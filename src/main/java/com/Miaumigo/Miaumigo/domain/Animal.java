@@ -1,15 +1,21 @@
 package com.Miaumigo.Miaumigo.domain;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -37,6 +43,21 @@ public class Animal {
 	@Column(length = 1000)
 	private String descricao;
 
+	@ElementCollection
+	@CollectionTable(name = "animal_tags", joinColumns = @JoinColumn(name = "animal_id"))
+	@Column(name = "tag", nullable = false)
+	@OrderColumn(name = "ordem")
+	private List<String> tags = new ArrayList<>();
+
+	@ElementCollection
+	@CollectionTable(name = "animal_logs", joinColumns = @JoinColumn(name = "animal_id"))
+	@Column(name = "mensagem", nullable = false, length = 1000)
+	@OrderColumn(name = "ordem")
+	private List<String> logs = new ArrayList<>();
+
+	@Column(name = "cloudinary_public_id")
+	private String cloudinaryPublicId;
+
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private AnimalStatus status;
@@ -54,6 +75,19 @@ public class Animal {
 	}
 
 	public Animal(String nome, Especie especie, Porte porte, Integer idade, String descricao, UUID larId) {
+		this(nome, especie, porte, idade, descricao, larId, List.of(), null);
+	}
+
+	public Animal(
+			String nome,
+			Especie especie,
+			Porte porte,
+			Integer idade,
+			String descricao,
+			UUID larId,
+			List<String> tags,
+			String cloudinaryPublicId
+	) {
 		validarDados(nome, especie, porte, idade, larId);
 		this.nome = nome;
 		this.especie = especie;
@@ -61,9 +95,12 @@ public class Animal {
 		this.idade = idade;
 		this.descricao = descricao;
 		this.larId = larId;
+		this.tags = normalizarTags(tags);
+		this.cloudinaryPublicId = normalizarTextoOpcional(cloudinaryPublicId);
 		this.status = AnimalStatus.DISPONIVEL;
 		this.criadoEm = LocalDateTime.now();
 		this.atualizadoEm = this.criadoEm;
+		this.logs.add("Animal cadastrado.");
 	}
 
 	public UUID getId() {
@@ -74,27 +111,19 @@ public class Animal {
 		return nome;
 	}
 
-	public void atualizarDados(String nome, Especie especie, Porte porte, Integer idade, String descricao) {
-		validarDados(nome, especie, porte, idade, this.larId);
-		this.nome = nome;
-		this.especie = especie;
-		this.porte = porte;
-		this.idade = idade;
-		this.descricao = descricao;
-		this.atualizadoEm = LocalDateTime.now();
-	}
-
 	public void transferirParaLar(UUID larId) {
 		if (this.status != AnimalStatus.DISPONIVEL) {
 			throw new IllegalStateException("Animal só pode ser transferido quando estiver disponível.");
 		}
 		validarLar(larId);
 		this.larId = larId;
+		adicionarLog("Animal transferido para outro lar.");
 		this.atualizadoEm = LocalDateTime.now();
 	}
 
 	public void disponibilizar() {
 		this.status = AnimalStatus.DISPONIVEL;
+		adicionarLog("Animal disponibilizado para adoção.");
 		this.atualizadoEm = LocalDateTime.now();
 	}
 
@@ -103,6 +132,7 @@ public class Animal {
 			throw new IllegalStateException("Apenas animais disponíveis podem iniciar processo de adoção.");
 		}
 		this.status = AnimalStatus.EM_PROCESSO;
+		adicionarLog("Processo de adoção iniciado.");
 		this.atualizadoEm = LocalDateTime.now();
 	}
 
@@ -111,7 +141,16 @@ public class Animal {
 			throw new IllegalStateException("Apenas animais em processo de adoção podem ser marcados como adotados.");
 		}
 		this.status = AnimalStatus.ADOTADO;
+		adicionarLog("Animal marcado como adotado.");
 		this.atualizadoEm = LocalDateTime.now();
+	}
+
+	public void adicionarLog(String mensagem) {
+		String mensagemNormalizada = normalizarTextoOpcional(mensagem);
+		if (mensagemNormalizada == null) {
+			throw new IllegalArgumentException("Mensagem do log é obrigatória.");
+		}
+		this.logs.add(mensagemNormalizada);
 	}
 
 	public Especie getEspecie() {
@@ -128,6 +167,18 @@ public class Animal {
 
 	public String getDescricao() {
 		return descricao;
+	}
+
+	public List<String> getTags() {
+		return List.copyOf(tags);
+	}
+
+	public List<String> getLogs() {
+		return List.copyOf(logs);
+	}
+
+	public String getCloudinaryPublicId() {
+		return cloudinaryPublicId;
 	}
 
 	public AnimalStatus getStatus() {
@@ -162,5 +213,24 @@ public class Animal {
 		if (larId == null) {
 			throw new IllegalArgumentException("Lar do animal é obrigatório.");
 		}
+	}
+
+	private List<String> normalizarTags(List<String> tags) {
+		if (tags == null) {
+			return new ArrayList<>();
+		}
+		List<String> tagsNormalizadas = tags.stream()
+				.map(this::normalizarTextoOpcional)
+				.filter(Objects::nonNull)
+				.distinct()
+				.toList();
+		return new ArrayList<>(tagsNormalizadas);
+	}
+
+	private String normalizarTextoOpcional(String texto) {
+		if (texto == null || texto.isBlank()) {
+			return null;
+		}
+		return texto.trim();
 	}
 }

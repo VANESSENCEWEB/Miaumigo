@@ -23,7 +23,17 @@ class AnimalRepositoryTest {
 
 	@Test
 	void deveSalvarAnimal_quandoDadosValidos() {
-		Animal animal = new Animal("Luna", Especie.GATO, Porte.PEQUENO, 2, "Dócil", UUID.randomUUID());
+		Animal animal = new Animal(
+				"Luna",
+				Especie.GATO,
+				Porte.PEQUENO,
+				2,
+				"Dócil",
+				UUID.randomUUID(),
+				List.of("dócil", "castrada"),
+				"animais/luna"
+		);
+		animal.adicionarLog("Recebeu vacina.");
 
 		Animal animalSalvo = animalRepository.save(animal);
 
@@ -32,6 +42,9 @@ class AnimalRepositoryTest {
 		assertTrue(animalEncontrado.isPresent());
 		assertEquals("Luna", animalEncontrado.get().getNome());
 		assertEquals(AnimalStatus.DISPONIVEL, animalEncontrado.get().getStatus());
+		assertEquals(List.of("dócil", "castrada"), animalEncontrado.get().getTags());
+		assertEquals("animais/luna", animalEncontrado.get().getCloudinaryPublicId());
+		assertEquals(2, animalEncontrado.get().getLogs().size());
 	}
 
 	@Test

@@ -2,9 +2,9 @@ package com.Miaumigo.Miaumigo.domain;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -19,6 +19,28 @@ class AnimalTest {
 		assertEquals("Luna", animal.getNome());
 		assertEquals(AnimalStatus.DISPONIVEL, animal.getStatus());
 		assertEquals(larId, animal.getLarId());
+		assertEquals(List.of(), animal.getTags());
+		assertEquals(1, animal.getLogs().size());
+		assertEquals("Animal cadastrado.", animal.getLogs().getFirst());
+	}
+
+	@Test
+	void deveCriarAnimalComTagsEPublicIdCloudinary_quandoDadosValidos() {
+		UUID larId = UUID.randomUUID();
+
+		Animal animal = new Animal(
+				"Luna",
+				Especie.GATO,
+				Porte.PEQUENO,
+				2,
+				"Dócil",
+				larId,
+				List.of("dócil", "castrada", "dócil", " "),
+				" animais/luna "
+		);
+
+		assertEquals(List.of("dócil", "castrada"), animal.getTags());
+		assertEquals("animais/luna", animal.getCloudinaryPublicId());
 	}
 
 	@Test
@@ -105,13 +127,19 @@ class AnimalTest {
 	}
 
 	@Test
-	void deveAtualizarDados_quandoDadosValidos() {
+	void deveAdicionarLog_quandoMensagemValida() {
 		Animal animal = new Animal("Luna", Especie.GATO, Porte.PEQUENO, 2, "Dócil", UUID.randomUUID());
 
-		assertDoesNotThrow(() -> animal.atualizarDados("Thor", Especie.CACHORRO, Porte.GRANDE, 4, "Brincalhão"));
+		animal.adicionarLog("Recebeu vacina.");
 
-		assertEquals("Thor", animal.getNome());
-		assertEquals(Especie.CACHORRO, animal.getEspecie());
-		assertEquals(Porte.GRANDE, animal.getPorte());
+		assertEquals(2, animal.getLogs().size());
+		assertEquals("Recebeu vacina.", animal.getLogs().get(1));
+	}
+
+	@Test
+	void deveLancarExcecao_quandoLogSemMensagem() {
+		Animal animal = new Animal("Luna", Especie.GATO, Porte.PEQUENO, 2, "Dócil", UUID.randomUUID());
+
+		assertThrows(IllegalArgumentException.class, () -> animal.adicionarLog(" "));
 	}
 }
