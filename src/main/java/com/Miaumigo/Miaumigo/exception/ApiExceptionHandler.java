@@ -34,4 +34,16 @@ public class ApiExceptionHandler {
 	public ErroResponse tratarErroEstado(IllegalStateException exception) {
 		return new ErroResponse(exception.getMessage(), List.of());
 	}
+
+	@ExceptionHandler(RecursoNaoEncontradoException.class)
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	public ErroResponse tratarRecursoNaoEncontrado(RecursoNaoEncontradoException exception) {
+		return new ErroResponse(exception.getMessage(), List.of());
+	}
+
+	@ExceptionHandler(Exception.class)
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+	public ErroResponse tratarErroInterno(Exception exception) {
+		return new ErroResponse("Erro interno no servidor", List.of());
+	}
 }
