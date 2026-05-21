@@ -1,17 +1,6 @@
 package com.Miaumigo.Miaumigo.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OrderColumn;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -43,13 +32,13 @@ public class Animal {
 	@Column(length = 1000)
 	private String descricao;
 
-	@ElementCollection
+	@ElementCollection(fetch = FetchType.EAGER)
 	@CollectionTable(name = "animal_tags", joinColumns = @JoinColumn(name = "animal_id"))
 	@Column(name = "tag", nullable = false)
 	@OrderColumn(name = "ordem")
 	private List<String> tags = new ArrayList<>();
 
-	@ElementCollection
+	@ElementCollection(fetch = FetchType.EAGER)
 	@CollectionTable(name = "animal_logs", joinColumns = @JoinColumn(name = "animal_id"))
 	@Column(name = "mensagem", nullable = false, length = 1000)
 	@OrderColumn(name = "ordem")
@@ -145,12 +134,29 @@ public class Animal {
 		this.atualizadoEm = LocalDateTime.now();
 	}
 
+	public void realizarAdocao(String adotadoPor) {
+		if (this.status != AnimalStatus.DISPONIVEL) {
+			throw new IllegalStateException("Apenas animais disponíveis podem ser adotados.");
+		}
+		String responsavel = normalizarTextoOpcional(adotadoPor);
+		if (responsavel == null) {
+			throw new IllegalArgumentException("Responsável pela adoção é obrigatório.");
+		}
+
+
+		this.status = AnimalStatus.ADOTADO;
+		this.atualizadoEm = LocalDateTime.now();
+		adicionarLog("Adotado por " + responsavel + ".");
+		this.atualizadoEm = LocalDateTime.now();
+	}
+
 	public void adicionarLog(String mensagem) {
 		String mensagemNormalizada = normalizarTextoOpcional(mensagem);
 		if (mensagemNormalizada == null) {
 			throw new IllegalArgumentException("Mensagem do log é obrigatória.");
 		}
 		this.logs.add(mensagemNormalizada);
+		this.atualizadoEm = LocalDateTime.now();
 	}
 
 	public Especie getEspecie() {

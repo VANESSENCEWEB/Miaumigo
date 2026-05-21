@@ -2,10 +2,13 @@ package com.Miaumigo.Miaumigo.domain;
 
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class AnimalTest {
@@ -127,6 +130,31 @@ class AnimalTest {
 	}
 
 	@Test
+	void deveRealizarAdocao_quandoAnimalDisponivel() {
+		Animal animal = new Animal("Luna", Especie.GATO, Porte.PEQUENO, 2, "Dócil", UUID.randomUUID());
+
+		animal.realizarAdocao("Maria Silva");
+
+		assertEquals(AnimalStatus.ADOTADO, animal.getStatus());
+		assertEquals("Adotado por Maria Silva.", animal.getLogs().get(1));
+	}
+
+	@Test
+	void deveLancarExcecao_quandoRealizarAdocaoAnimalIndisponivel() {
+		Animal animal = new Animal("Luna", Especie.GATO, Porte.PEQUENO, 2, "Dócil", UUID.randomUUID());
+		animal.iniciarProcessoAdocao();
+
+		assertThrows(IllegalStateException.class, () -> animal.realizarAdocao("Maria Silva"));
+	}
+
+	@Test
+	void deveLancarExcecao_quandoRealizarAdocaoSemResponsavel() {
+		Animal animal = new Animal("Luna", Especie.GATO, Porte.PEQUENO, 2, "Dócil", UUID.randomUUID());
+
+		assertThrows(IllegalArgumentException.class, () -> animal.realizarAdocao(" "));
+	}
+
+	@Test
 	void deveAdicionarLog_quandoMensagemValida() {
 		Animal animal = new Animal("Luna", Especie.GATO, Porte.PEQUENO, 2, "Dócil", UUID.randomUUID());
 
@@ -141,5 +169,67 @@ class AnimalTest {
 		Animal animal = new Animal("Luna", Especie.GATO, Porte.PEQUENO, 2, "Dócil", UUID.randomUUID());
 
 		assertThrows(IllegalArgumentException.class, () -> animal.adicionarLog(" "));
+	}
+
+	@Test
+	void deveAtualizarDataAtualizadoEm_quandoTransferirParaLar() {
+		Animal animal = new Animal("Luna", Especie.GATO, Porte.PEQUENO, 2, "Dócil", UUID.randomUUID());
+
+		assertAtualizadoEmFoiAtualizado(animal, a -> a.transferirParaLar(UUID.randomUUID()));
+	}
+
+	@Test
+	void deveAtualizarDataAtualizadoEm_quandoDisponibilizar() {
+		Animal animal = new Animal("Luna", Especie.GATO, Porte.PEQUENO, 2, "Dócil", UUID.randomUUID());
+		animal.iniciarProcessoAdocao();
+
+		assertAtualizadoEmFoiAtualizado(animal, Animal::disponibilizar);
+	}
+
+	@Test
+	void deveAtualizarDataAtualizadoEm_quandoIniciarProcessoAdocao() {
+		Animal animal = new Animal("Luna", Especie.GATO, Porte.PEQUENO, 2, "Dócil", UUID.randomUUID());
+
+		assertAtualizadoEmFoiAtualizado(animal, Animal::iniciarProcessoAdocao);
+	}
+
+	@Test
+	void deveAtualizarDataAtualizadoEm_quandoMarcarComoAdotado() {
+		Animal animal = new Animal("Luna", Especie.GATO, Porte.PEQUENO, 2, "Dócil", UUID.randomUUID());
+		animal.iniciarProcessoAdocao();
+
+		assertAtualizadoEmFoiAtualizado(animal, Animal::marcarComoAdotado);
+	}
+
+	@Test
+	void deveAtualizarDataAtualizadoEm_quandoRealizarAdocao() {
+		Animal animal = new Animal("Luna", Especie.GATO, Porte.PEQUENO, 2, "Dócil", UUID.randomUUID());
+
+		assertAtualizadoEmFoiAtualizado(animal, a -> a.realizarAdocao("Maria Silva"));
+	}
+
+	@Test
+	void deveAtualizarDataAtualizadoEm_quandoAdicionarLog() {
+		Animal animal = new Animal("Luna", Especie.GATO, Porte.PEQUENO, 2, "Dócil", UUID.randomUUID());
+
+		assertAtualizadoEmFoiAtualizado(animal, a -> a.adicionarLog("Recebeu vacina."));
+	}
+
+	private void assertAtualizadoEmFoiAtualizado(Animal animal, Consumer<Animal> acao) {
+		LocalDateTime atualizadoEmAnterior = animal.getAtualizadoEm();
+		aguardarProximoInstante();
+
+		acao.accept(animal);
+
+		assertTrue(animal.getAtualizadoEm().isAfter(atualizadoEmAnterior));
+	}
+
+	private void aguardarProximoInstante() {
+		try {
+			Thread.sleep(5);
+		} catch (InterruptedException exception) {
+			Thread.currentThread().interrupt();
+			throw new IllegalStateException("Teste interrompido.", exception);
+		}
 	}
 }
