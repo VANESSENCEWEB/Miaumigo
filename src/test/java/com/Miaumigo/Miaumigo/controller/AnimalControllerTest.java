@@ -1,6 +1,9 @@
 package com.Miaumigo.Miaumigo.controller;
 
+import com.Miaumigo.Miaumigo.domain.Especie;
+import com.Miaumigo.Miaumigo.domain.Porte;
 import com.Miaumigo.Miaumigo.dto.AcaoRealizadaResponse;
+import com.Miaumigo.Miaumigo.dto.AnimalResponse;
 import com.Miaumigo.Miaumigo.exception.RecursoNaoEncontradoException;
 import com.Miaumigo.Miaumigo.service.AnimalService;
 import org.junit.jupiter.api.Test;
@@ -11,11 +14,13 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.UUID;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -177,6 +182,46 @@ class AnimalControllerTest {
 						.content(request))
 				.andExpect(status().isNotFound())
 				.andExpect(jsonPath("$.mensagem").value("Animal não encontrado."))
+				.andExpect(jsonPath("$.erros").isArray());
+	}
+
+	@Test
+	void deveRetornarAnimal_quandoIdValido() throws Exception {
+		UUID id = UUID.fromString("11111111-1111-1111-1111-111111111111");
+		when(animalService.buscarPorId(id))
+				.thenReturn(new AnimalResponse(
+						id,
+						"Luna",
+						2,
+						Porte.PEQUENO,
+						Especie.GATO,
+						List.of("dócil", "castrada"),
+						"animais/luna"
+				));
+
+		mockMvc.perform(get("/api/v1/animais/{id}", id))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.id").value(id.toString()))
+				.andExpect(jsonPath("$.nome").value("Luna"))
+				.andExpect(jsonPath("$.idade").value(2))
+				.andExpect(jsonPath("$.porte").value("PEQUENO"))
+				.andExpect(jsonPath("$.especie").value("GATO"))
+				.andExpect(jsonPath("$.tags[0]").value("dócil"))
+				.andExpect(jsonPath("$.tags[1]").value("castrada"))
+				.andExpect(jsonPath("$.cloudinary_public_id").value("animais/luna"));
+
+		verify(animalService).buscarPorId(id);
+	}
+
+	@Test
+	void deveRetornarNotFound_quandoAnimalNaoEncontrado() throws Exception {
+		UUID id = UUID.fromString("11111111-1111-1111-1111-111111111111");
+		doThrow(new RecursoNaoEncontradoException("Animal não encontrado"))
+				.when(animalService).buscarPorId(id);
+
+		mockMvc.perform(get("/api/v1/animais/{id}", id))
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.mensagem").value("Animal não encontrado"))
 				.andExpect(jsonPath("$.erros").isArray());
 	}
 }

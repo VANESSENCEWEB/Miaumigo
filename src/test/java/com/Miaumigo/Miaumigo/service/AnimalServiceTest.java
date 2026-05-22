@@ -5,12 +5,14 @@ import com.Miaumigo.Miaumigo.domain.AnimalStatus;
 import com.Miaumigo.Miaumigo.domain.Especie;
 import com.Miaumigo.Miaumigo.domain.Porte;
 import com.Miaumigo.Miaumigo.dto.AcaoRealizadaResponse;
+import com.Miaumigo.Miaumigo.dto.AnimalResponse;
 import com.Miaumigo.Miaumigo.dto.CadastroAnimalRequest;
 import com.Miaumigo.Miaumigo.dto.RealizarAdocaoRequest;
 import com.Miaumigo.Miaumigo.exception.RecursoNaoEncontradoException;
 import com.Miaumigo.Miaumigo.repository.AnimalRepository;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -88,5 +90,45 @@ class AnimalServiceTest {
 		);
 
 		assertEquals("Animal não encontrado.", exception.getMessage());
+	}
+
+	@Test
+	void deveRetornarAnimal_quandoIdValido() {
+		UUID id = UUID.randomUUID();
+		Animal animal = new Animal(
+				"Luna",
+				Especie.GATO,
+				Porte.PEQUENO,
+				2,
+				"Dócil",
+				UUID.randomUUID(),
+				List.of("dócil", "castrada"),
+				"animais/luna"
+		);
+		ReflectionTestUtils.setField(animal, "id", id);
+		when(animalRepository.findById(id)).thenReturn(Optional.of(animal));
+
+		AnimalResponse response = animalService.buscarPorId(id);
+
+		assertEquals(animal.getId(), response.id());
+		assertEquals("Luna", response.nome());
+		assertEquals(2, response.idade());
+		assertEquals(Porte.PEQUENO, response.porte());
+		assertEquals(Especie.GATO, response.especie());
+		assertEquals(List.of("dócil", "castrada"), response.tags());
+		assertEquals("animais/luna", response.cloudinaryPublicId());
+	}
+
+	@Test
+	void deveLancarExcecao_quandoAnimalNaoEncontrado() {
+		UUID id = UUID.randomUUID();
+		when(animalRepository.findById(id)).thenReturn(Optional.empty());
+
+		RecursoNaoEncontradoException exception = assertThrows(
+				RecursoNaoEncontradoException.class,
+				() -> animalService.buscarPorId(id)
+		);
+
+		assertEquals("Animal não encontrado", exception.getMessage());
 	}
 }

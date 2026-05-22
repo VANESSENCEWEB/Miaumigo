@@ -32,13 +32,13 @@ public class Animal {
 	@Column(length = 1000)
 	private String descricao;
 
-	@ElementCollection(fetch = FetchType.EAGER)
+	@ElementCollection
 	@CollectionTable(name = "animal_tags", joinColumns = @JoinColumn(name = "animal_id"))
 	@Column(name = "tag", nullable = false)
 	@OrderColumn(name = "ordem")
 	private List<String> tags = new ArrayList<>();
 
-	@ElementCollection(fetch = FetchType.EAGER)
+	@ElementCollection
 	@CollectionTable(name = "animal_logs", joinColumns = @JoinColumn(name = "animal_id"))
 	@Column(name = "mensagem", nullable = false, length = 1000)
 	@OrderColumn(name = "ordem")
