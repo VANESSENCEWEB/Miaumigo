@@ -1,5 +1,6 @@
 package com.Miaumigo.Miaumigo.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -33,6 +34,31 @@ public class ApiExceptionHandler {
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ErroResponse tratarErroEstado(IllegalStateException exception) {
 		return new ErroResponse(exception.getMessage(), List.of());
+	}
+
+	@ExceptionHandler(EmailJaCadastradoException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ErroResponse tratarEmailJaCadastrado(EmailJaCadastradoException exception) {
+		return new ErroResponse(exception.getMessage(), List.of());
+	}
+
+	@ExceptionHandler(CpfJaCadastradoException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ErroResponse tratarCpfJaCadastrado(CpfJaCadastradoException exception) {
+		return new ErroResponse(exception.getMessage(), List.of());
+	}
+
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ErroResponse tratarErroIntegridade(DataIntegrityViolationException exception) {
+		String mensagem = exception.getMostSpecificCause().getMessage();
+		if (mensagem != null && mensagem.contains("uk_usuarios_email")) {
+			return new ErroResponse("Email já cadastrado.", List.of());
+		}
+		if (mensagem != null && mensagem.contains("uk_usuarios_cpf")) {
+			return new ErroResponse("CPF já cadastrado.", List.of());
+		}
+		return new ErroResponse("Dados violam uma restrição do banco.", List.of());
 	}
 
 	@ExceptionHandler(RecursoNaoEncontradoException.class)

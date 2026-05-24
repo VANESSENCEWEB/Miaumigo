@@ -1,11 +1,13 @@
 package com.Miaumigo.Miaumigo.service;
 
+import com.Miaumigo.Miaumigo.domain.Adotante;
 import com.Miaumigo.Miaumigo.domain.Animal;
 import com.Miaumigo.Miaumigo.dto.AcaoRealizadaResponse;
 import com.Miaumigo.Miaumigo.dto.AnimalResponse;
 import com.Miaumigo.Miaumigo.dto.CadastroAnimalRequest;
 import com.Miaumigo.Miaumigo.dto.RealizarAdocaoRequest;
 import com.Miaumigo.Miaumigo.exception.RecursoNaoEncontradoException;
+import com.Miaumigo.Miaumigo.repository.AdotanteRepository;
 import com.Miaumigo.Miaumigo.repository.AnimalRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,9 +18,11 @@ import java.util.UUID;
 public class AnimalService {
 
 	private final AnimalRepository animalRepository;
+	private final AdotanteRepository adotanteRepository;
 
-	public AnimalService(AnimalRepository animalRepository) {
+	public AnimalService(AnimalRepository animalRepository, AdotanteRepository adotanteRepository) {
 		this.animalRepository = animalRepository;
+		this.adotanteRepository = adotanteRepository;
 	}
 
 	public void cadastrar(CadastroAnimalRequest request) {
@@ -52,14 +56,29 @@ public class AnimalService {
 		);
 	}
 
-	//Refatorar quando entidade usuario existir
+	@Transactional
 	public AcaoRealizadaResponse realizarAdocao(UUID id, RealizarAdocaoRequest request) {
 		Animal animal = animalRepository.findById(id)
 				.orElseThrow(() -> new RecursoNaoEncontradoException("Animal não encontrado."));
+		Adotante adotante = adotanteRepository.findById(request.adotanteId())
+				.orElseThrow(() -> new RecursoNaoEncontradoException("Adotante não encontrado."));
 
-		animal.realizarAdocao(request.adotadoPor());
+		animal.realizarAdocao(adotante);
+		adotante.adicionarLog("Adotou " + animal.getNome() + ".");
 		animalRepository.save(animal);
 
 		return new AcaoRealizadaResponse("Adoção realizada com sucesso.");
+	}
+
+	@Transactional
+	public AcaoRealizadaResponse devolverAnimal(UUID id, String motivo) {
+		Animal animal = animalRepository.findById(id)
+				.orElseThrow(() -> new RecursoNaoEncontradoException("Animal não encontrado."));
+
+		Adotante adotante = animal.devolver(motivo);
+		adotante.adicionarLog("Devolveu " + animal.getNome() + ".");
+		animalRepository.save(animal);
+
+		return new AcaoRealizadaResponse("Devolução registrada com sucesso.");
 	}
 }

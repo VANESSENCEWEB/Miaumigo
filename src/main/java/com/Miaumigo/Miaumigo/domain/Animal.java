@@ -4,8 +4,10 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -34,9 +36,10 @@ public class Animal {
 
 	@ElementCollection
 	@CollectionTable(name = "animal_tags", joinColumns = @JoinColumn(name = "animal_id"))
+	@Enumerated(EnumType.STRING)
 	@Column(name = "tag", nullable = false)
 	@OrderColumn(name = "ordem")
-	private List<String> tags = new ArrayList<>();
+	private List<Tag> tags = new ArrayList<>();
 
 	@ElementCollection
 	@CollectionTable(name = "animal_logs", joinColumns = @JoinColumn(name = "animal_id"))
@@ -50,6 +53,18 @@ public class Animal {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private AnimalStatus status;
+
+	@ManyToMany
+	@JoinTable(
+			name = "animal_adotantes",
+			joinColumns = @JoinColumn(name = "animal_id"),
+			inverseJoinColumns = @JoinColumn(name = "adotante_id")
+	)
+	private Set<Adotante> adotantes = new LinkedHashSet<>();
+
+	@ManyToOne
+	@JoinColumn(name = "adotante_atual_id")
+	private Adotante adotanteAtual;
 
 	@Column(name = "lar_id", nullable = false)
 	private UUID larId;
@@ -74,7 +89,7 @@ public class Animal {
 			Integer idade,
 			String descricao,
 			UUID larId,
-			List<String> tags,
+			List<Tag> tags,
 			String cloudinaryPublicId
 	) {
 		validarDados(nome, especie, porte, idade, larId);
@@ -134,20 +149,35 @@ public class Animal {
 		this.atualizadoEm = LocalDateTime.now();
 	}
 
-	public void realizarAdocao(String adotadoPor) {
+	public void realizarAdocao(Adotante adotante) {
 		if (this.status != AnimalStatus.DISPONIVEL) {
 			throw new IllegalStateException("Apenas animais disponíveis podem ser adotados.");
 		}
-		String responsavel = normalizarTextoOpcional(adotadoPor);
-		if (responsavel == null) {
-			throw new IllegalArgumentException("Responsável pela adoção é obrigatório.");
+		if (adotante == null) {
+			throw new IllegalArgumentException("Adotante é obrigatório.");
 		}
 
-
+		this.adotanteAtual = adotante;
+		this.adotantes.add(adotante);
 		this.status = AnimalStatus.ADOTADO;
+		adicionarLog("Adotado por " + adotante.getNome() + ".");
+	}
+
+	public Adotante devolver(String motivo) {
+		if (this.status != AnimalStatus.ADOTADO || this.adotanteAtual == null) {
+			throw new IllegalStateException("Apenas animais adotados podem ser devolvidos.");
+		}
+		Adotante adotanteAnterior = this.adotanteAtual;
+		this.adotanteAtual = null;
+		this.status = AnimalStatus.DISPONIVEL;
+		String motivoNormalizado = normalizarTextoOpcional(motivo);
+		if (motivoNormalizado == null) {
+			adicionarLog("Animal devolvido por " + adotanteAnterior.getNome() + ".");
+		} else {
+			adicionarLog("Animal devolvido por " + adotanteAnterior.getNome() + ". Motivo: " + motivoNormalizado + ".");
+		}
 		this.atualizadoEm = LocalDateTime.now();
-		adicionarLog("Adotado por " + responsavel + ".");
-		this.atualizadoEm = LocalDateTime.now();
+		return adotanteAnterior;
 	}
 
 	public void adicionarLog(String mensagem) {
@@ -175,7 +205,7 @@ public class Animal {
 		return descricao;
 	}
 
-	public List<String> getTags() {
+	public List<Tag> getTags() {
 		return List.copyOf(tags);
 	}
 
@@ -189,6 +219,14 @@ public class Animal {
 
 	public AnimalStatus getStatus() {
 		return status;
+	}
+
+	public Set<Adotante> getAdotantes() {
+		return Set.copyOf(adotantes);
+	}
+
+	public Adotante getAdotanteAtual() {
+		return adotanteAtual;
 	}
 
 	public UUID getLarId() {
@@ -221,12 +259,11 @@ public class Animal {
 		}
 	}
 
-	private List<String> normalizarTags(List<String> tags) {
+	private List<Tag> normalizarTags(List<Tag> tags) {
 		if (tags == null) {
 			return new ArrayList<>();
 		}
-		List<String> tagsNormalizadas = tags.stream()
-				.map(this::normalizarTextoOpcional)
+		List<Tag> tagsNormalizadas = tags.stream()
 				.filter(Objects::nonNull)
 				.distinct()
 				.toList();

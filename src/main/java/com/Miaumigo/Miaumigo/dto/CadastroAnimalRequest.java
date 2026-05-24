@@ -2,6 +2,7 @@ package com.Miaumigo.Miaumigo.dto;
 
 import com.Miaumigo.Miaumigo.domain.Especie;
 import com.Miaumigo.Miaumigo.domain.Porte;
+import com.Miaumigo.Miaumigo.domain.Tag;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -25,7 +26,7 @@ public record CadastroAnimalRequest(
 
 		String descricao,
 
-		List<String> tags,
+		List<Tag> tags,
 
 
 		//Verificar se esse realmente é o nome da chave dada pelo cloudnary

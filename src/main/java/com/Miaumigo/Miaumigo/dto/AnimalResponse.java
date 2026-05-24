@@ -2,6 +2,7 @@ package com.Miaumigo.Miaumigo.dto;
 
 import com.Miaumigo.Miaumigo.domain.Especie;
 import com.Miaumigo.Miaumigo.domain.Porte;
+import com.Miaumigo.Miaumigo.domain.Tag;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
@@ -13,7 +14,7 @@ public record AnimalResponse(
 		Integer idade,
 		Porte porte,
 		Especie especie,
-		List<String> tags,
+		List<Tag> tags,
 
 		@JsonProperty("cloudinary_public_id")
 		String cloudinaryPublicId

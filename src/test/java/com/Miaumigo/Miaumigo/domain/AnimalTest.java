@@ -3,6 +3,7 @@ package com.Miaumigo.Miaumigo.domain;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -38,11 +39,11 @@ class AnimalTest {
 				2,
 				"Dócil",
 				larId,
-				List.of("dócil", "castrada", "dócil", " "),
+				Arrays.asList(Tag.DOCIL, Tag.CASTRADO, Tag.DOCIL, null),
 				" animais/luna "
 		);
 
-		assertEquals(List.of("dócil", "castrada"), animal.getTags());
+		assertEquals(List.of(Tag.DOCIL, Tag.CASTRADO), animal.getTags());
 		assertEquals("animais/luna", animal.getCloudinaryPublicId());
 	}
 
@@ -132,10 +133,13 @@ class AnimalTest {
 	@Test
 	void deveRealizarAdocao_quandoAnimalDisponivel() {
 		Animal animal = new Animal("Luna", Especie.GATO, Porte.PEQUENO, 2, "Dócil", UUID.randomUUID());
+		Adotante adotante = novoAdotante("Maria Silva");
 
-		animal.realizarAdocao("Maria Silva");
+		animal.realizarAdocao(adotante);
 
 		assertEquals(AnimalStatus.ADOTADO, animal.getStatus());
+		assertEquals(adotante, animal.getAdotanteAtual());
+		assertTrue(animal.getAdotantes().contains(adotante));
 		assertEquals("Adotado por Maria Silva.", animal.getLogs().get(1));
 	}
 
@@ -144,14 +148,52 @@ class AnimalTest {
 		Animal animal = new Animal("Luna", Especie.GATO, Porte.PEQUENO, 2, "Dócil", UUID.randomUUID());
 		animal.iniciarProcessoAdocao();
 
-		assertThrows(IllegalStateException.class, () -> animal.realizarAdocao("Maria Silva"));
+		assertThrows(IllegalStateException.class, () -> animal.realizarAdocao(novoAdotante("Maria Silva")));
 	}
 
 	@Test
-	void deveLancarExcecao_quandoRealizarAdocaoSemResponsavel() {
+	void deveLancarExcecao_quandoRealizarAdocaoSemAdotante() {
 		Animal animal = new Animal("Luna", Especie.GATO, Porte.PEQUENO, 2, "Dócil", UUID.randomUUID());
 
-		assertThrows(IllegalArgumentException.class, () -> animal.realizarAdocao(" "));
+		assertThrows(IllegalArgumentException.class, () -> animal.realizarAdocao(null));
+	}
+
+	@Test
+	void deveDevolverAnimal_quandoAnimalAdotado() {
+		Animal animal = new Animal("Luna", Especie.GATO, Porte.PEQUENO, 2, "Dócil", UUID.randomUUID());
+		Adotante adotante = novoAdotante("Maria Silva");
+		animal.realizarAdocao(adotante);
+
+		Adotante adotanteAnterior = animal.devolver("Não se adaptou");
+
+		assertEquals(adotante, adotanteAnterior);
+		assertEquals(AnimalStatus.DISPONIVEL, animal.getStatus());
+		assertEquals(null, animal.getAdotanteAtual());
+		assertTrue(animal.getAdotantes().contains(adotante));
+		assertEquals("Animal devolvido por Maria Silva. Motivo: Não se adaptou.", animal.getLogs().get(2));
+	}
+
+	@Test
+	void devePermitirNovaAdocao_quandoAnimalFoiDevolvido() {
+		Animal animal = new Animal("Luna", Especie.GATO, Porte.PEQUENO, 2, "Dócil", UUID.randomUUID());
+		Adotante primeiroAdotante = novoAdotante("Maria Silva");
+		Adotante segundoAdotante = novoAdotante("João Souza");
+		animal.realizarAdocao(primeiroAdotante);
+		animal.devolver(null);
+
+		animal.realizarAdocao(segundoAdotante);
+
+		assertEquals(AnimalStatus.ADOTADO, animal.getStatus());
+		assertEquals(segundoAdotante, animal.getAdotanteAtual());
+		assertTrue(animal.getAdotantes().contains(primeiroAdotante));
+		assertTrue(animal.getAdotantes().contains(segundoAdotante));
+	}
+
+	@Test
+	void deveLancarExcecao_quandoDevolverAnimalNaoAdotado() {
+		Animal animal = new Animal("Luna", Especie.GATO, Porte.PEQUENO, 2, "Dócil", UUID.randomUUID());
+
+		assertThrows(IllegalStateException.class, () -> animal.devolver("Não se adaptou"));
 	}
 
 	@Test
@@ -205,7 +247,15 @@ class AnimalTest {
 	void deveAtualizarDataAtualizadoEm_quandoRealizarAdocao() {
 		Animal animal = new Animal("Luna", Especie.GATO, Porte.PEQUENO, 2, "Dócil", UUID.randomUUID());
 
-		assertAtualizadoEmFoiAtualizado(animal, a -> a.realizarAdocao("Maria Silva"));
+		assertAtualizadoEmFoiAtualizado(animal, a -> a.realizarAdocao(novoAdotante("Maria Silva")));
+	}
+
+	@Test
+	void deveAtualizarDataAtualizadoEm_quandoDevolver() {
+		Animal animal = new Animal("Luna", Especie.GATO, Porte.PEQUENO, 2, "Dócil", UUID.randomUUID());
+		animal.realizarAdocao(novoAdotante("Maria Silva"));
+
+		assertAtualizadoEmFoiAtualizado(animal, a -> a.devolver("Não se adaptou"));
 	}
 
 	@Test
@@ -231,5 +281,9 @@ class AnimalTest {
 			Thread.currentThread().interrupt();
 			throw new IllegalStateException("Teste interrompido.", exception);
 		}
+	}
+
+	private Adotante novoAdotante(String nome) {
+		return new Adotante(nome, "Rua das Flores, 123", nome.replace(" ", ".") + "@email.com", "senha123", "12345678901", List.of());
 	}
 }

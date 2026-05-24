@@ -2,6 +2,7 @@ package com.Miaumigo.Miaumigo.controller;
 
 import com.Miaumigo.Miaumigo.domain.Especie;
 import com.Miaumigo.Miaumigo.domain.Porte;
+import com.Miaumigo.Miaumigo.domain.Tag;
 import com.Miaumigo.Miaumigo.dto.AcaoRealizadaResponse;
 import com.Miaumigo.Miaumigo.dto.AnimalResponse;
 import com.Miaumigo.Miaumigo.exception.RecursoNaoEncontradoException;
@@ -44,7 +45,7 @@ class AnimalControllerTest {
 					"porte": "PEQUENO",
 					"idade": 2,
 					"descricao": "Dócil e tranquila",
-					"tags": ["dócil", "castrada"],
+					"tags": ["DOCIL", "CASTRADO"],
 					"cloudinary_public_id": "animais/luna",
 					"lar_id": "550e8400-e29b-41d4-a716-446655440000"
 				}
@@ -88,7 +89,7 @@ class AnimalControllerTest {
 					"porte": "PEQUENO",
 					"idade": 2,
 					"descricao": "Dócil e tranquila",
-					"tags": ["dócil"],
+					"tags": ["DOCIL"],
 					"cloudinary_public_id": "animais/luna",
 					"lar_id": "550e8400-e29b-41d4-a716-446655440000"
 				}
@@ -113,7 +114,7 @@ class AnimalControllerTest {
 					"porte": "PEQUENO",
 					"idade": 2,
 					"descricao": "Dócil e tranquila",
-					"tags": ["dócil"],
+					"tags": ["DOCIL"],
 					"cloudinary_public_id": "animais/luna",
 					"lar_id": "550e8400-e29b-41d4-a716-446655440000"
 				}
@@ -134,7 +135,7 @@ class AnimalControllerTest {
 		UUID id = UUID.fromString("11111111-1111-1111-1111-111111111111");
 		String request = """
 				{
-					"adotado_por": "Maria Silva"
+					"adotante_id": "22222222-2222-2222-2222-222222222222"
 				}
 				""";
 		when(animalService.realizarAdocao(any(), any()))
@@ -150,12 +151,10 @@ class AnimalControllerTest {
 	}
 
 	@Test
-	void deveRetornarBadRequest_quandoAdocaoSemResponsavel() throws Exception {
+	void deveRetornarBadRequest_quandoAdocaoSemAdotante() throws Exception {
 		UUID id = UUID.fromString("11111111-1111-1111-1111-111111111111");
 		String request = """
-				{
-					"adotado_por": ""
-				}
+				{}
 				""";
 
 		mockMvc.perform(post("/api/v1/animais/{id}/adocao", id)
@@ -171,7 +170,7 @@ class AnimalControllerTest {
 		UUID id = UUID.fromString("11111111-1111-1111-1111-111111111111");
 		String request = """
 				{
-					"adotado_por": "Maria Silva"
+					"adotante_id": "22222222-2222-2222-2222-222222222222"
 				}
 				""";
 		doThrow(new RecursoNaoEncontradoException("Animal não encontrado."))
@@ -195,7 +194,7 @@ class AnimalControllerTest {
 						2,
 						Porte.PEQUENO,
 						Especie.GATO,
-						List.of("dócil", "castrada"),
+						List.of(Tag.DOCIL, Tag.CASTRADO),
 						"animais/luna"
 				));
 
@@ -206,8 +205,8 @@ class AnimalControllerTest {
 				.andExpect(jsonPath("$.idade").value(2))
 				.andExpect(jsonPath("$.porte").value("PEQUENO"))
 				.andExpect(jsonPath("$.especie").value("GATO"))
-				.andExpect(jsonPath("$.tags[0]").value("dócil"))
-				.andExpect(jsonPath("$.tags[1]").value("castrada"))
+				.andExpect(jsonPath("$.tags[0]").value("DOCIL"))
+				.andExpect(jsonPath("$.tags[1]").value("CASTRADO"))
 				.andExpect(jsonPath("$.cloudinary_public_id").value("animais/luna"));
 
 		verify(animalService).buscarPorId(id);
