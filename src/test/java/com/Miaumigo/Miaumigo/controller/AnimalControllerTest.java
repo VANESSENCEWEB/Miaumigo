@@ -18,6 +18,7 @@ import java.util.UUID;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -45,7 +46,7 @@ class AnimalControllerTest {
 					"porte": "PEQUENO",
 					"idade": 2,
 					"descricao": "Dócil e tranquila",
-					"tags": ["DOCIL", "CASTRADO"],
+					"tags": ["DOCIL", "CARINHOSO"],
 					"cloudinary_public_id": "animais/luna",
 					"lar_id": "550e8400-e29b-41d4-a716-446655440000"
 				}
@@ -58,6 +59,54 @@ class AnimalControllerTest {
 				.andExpect(content().string(""));
 
 		verify(animalService).cadastrar(any());
+	}
+
+	@Test
+	void deveCadastrarAnimal_quandoTagsDeMatchmakingInformadas() throws Exception {
+		String request = """
+				{
+					"nome": "Thor",
+					"especie": "CACHORRO",
+					"porte": "MEDIO",
+					"idade": 3,
+					"tags": [
+						"BRINCALHAO",
+						"CALMO",
+						"INDEPENDENTE",
+						"CARINHOSO",
+						"SOCIAL",
+						"PROTETOR",
+						"ENERGICO",
+						"ADAPTADO_A_APARTAMENTO",
+						"PRECISA_DE_ESPACO",
+						"CONVIVE_COM_CRIANCAS",
+						"CONVIVE_COM_CAES",
+						"CONVIVE_COM_GATOS"
+					],
+					"lar_id": "550e8400-e29b-41d4-a716-446655440000"
+				}
+				""";
+
+		mockMvc.perform(post("/api/v1/animais")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(request))
+				.andExpect(status().isCreated());
+
+		verify(animalService).cadastrar(argThat(cadastro ->
+				cadastro.tags().equals(List.of(
+						Tag.BRINCALHAO,
+						Tag.CALMO,
+						Tag.INDEPENDENTE,
+						Tag.CARINHOSO,
+						Tag.SOCIAL,
+						Tag.PROTETOR,
+						Tag.ENERGICO,
+						Tag.ADAPTADO_A_APARTAMENTO,
+						Tag.PRECISA_DE_ESPACO,
+						Tag.CONVIVE_COM_CRIANCAS,
+						Tag.CONVIVE_COM_CAES,
+						Tag.CONVIVE_COM_GATOS
+				))));
 	}
 
 	@Test
@@ -194,7 +243,7 @@ class AnimalControllerTest {
 						2,
 						Porte.PEQUENO,
 						Especie.GATO,
-						List.of(Tag.DOCIL, Tag.CASTRADO),
+						List.of(Tag.DOCIL, Tag.CARINHOSO),
 						"animais/luna"
 				));
 
@@ -206,7 +255,7 @@ class AnimalControllerTest {
 				.andExpect(jsonPath("$.porte").value("PEQUENO"))
 				.andExpect(jsonPath("$.especie").value("GATO"))
 				.andExpect(jsonPath("$.tags[0]").value("DOCIL"))
-				.andExpect(jsonPath("$.tags[1]").value("CASTRADO"))
+				.andExpect(jsonPath("$.tags[1]").value("CARINHOSO"))
 				.andExpect(jsonPath("$.cloudinary_public_id").value("animais/luna"));
 
 		verify(animalService).buscarPorId(id);

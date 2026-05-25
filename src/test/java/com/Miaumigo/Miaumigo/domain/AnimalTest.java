@@ -39,11 +39,11 @@ class AnimalTest {
 				2,
 				"Dócil",
 				larId,
-				Arrays.asList(Tag.DOCIL, Tag.CASTRADO, Tag.DOCIL, null),
+				Arrays.asList(Tag.DOCIL, Tag.CARINHOSO, Tag.DOCIL, null),
 				" animais/luna "
 		);
 
-		assertEquals(List.of(Tag.DOCIL, Tag.CASTRADO), animal.getTags());
+		assertEquals(List.of(Tag.DOCIL, Tag.CARINHOSO), animal.getTags());
 		assertEquals("animais/luna", animal.getCloudinaryPublicId());
 	}
 

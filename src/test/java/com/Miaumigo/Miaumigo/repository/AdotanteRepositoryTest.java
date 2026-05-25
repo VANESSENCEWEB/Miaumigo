@@ -31,7 +31,7 @@ class AdotanteRepositoryTest {
 
 		assertTrue(adotanteEncontrado.isPresent());
 		assertEquals("Maria Silva", adotanteEncontrado.get().getNome());
-		assertEquals(List.of(Tag.DOCIL, Tag.CASTRADO), adotanteEncontrado.get().getPreferencias());
+		assertEquals(List.of(Tag.CALMO, Tag.CONVIVE_COM_GATOS), adotanteEncontrado.get().getPreferencias());
 		assertEquals(List.of("Adotou Luna."), adotanteEncontrado.get().getLogs());
 	}
 
@@ -52,6 +52,6 @@ class AdotanteRepositoryTest {
 	}
 
 	private Adotante novoAdotante(String nome, String email, String cpf) {
-		return new Adotante(nome, "Rua das Flores, 123", email, "senha123", cpf, List.of(Tag.DOCIL, Tag.CASTRADO));
+		return new Adotante(nome, "Rua das Flores, 123", email, "senha123", cpf, List.of(Tag.CALMO, Tag.CONVIVE_COM_GATOS));
 	}
 }

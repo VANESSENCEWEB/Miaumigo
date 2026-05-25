@@ -39,7 +39,7 @@ class AnimalRepositoryTest {
 				2,
 				"Dócil",
 				UUID.randomUUID(),
-				List.of(Tag.DOCIL, Tag.CASTRADO),
+				List.of(Tag.CARINHOSO, Tag.ADAPTADO_A_APARTAMENTO, Tag.CONVIVE_COM_CRIANCAS),
 				"animais/luna"
 		);
 		animal.adicionarLog("Recebeu vacina.");
@@ -51,7 +51,7 @@ class AnimalRepositoryTest {
 		assertTrue(animalEncontrado.isPresent());
 		assertEquals("Luna", animalEncontrado.get().getNome());
 		assertEquals(AnimalStatus.DISPONIVEL, animalEncontrado.get().getStatus());
-		assertEquals(List.of(Tag.DOCIL, Tag.CASTRADO), animalEncontrado.get().getTags());
+		assertEquals(List.of(Tag.CARINHOSO, Tag.ADAPTADO_A_APARTAMENTO, Tag.CONVIVE_COM_CRIANCAS), animalEncontrado.get().getTags());
 		assertEquals("animais/luna", animalEncontrado.get().getCloudinaryPublicId());
 		assertEquals(2, animalEncontrado.get().getLogs().size());
 	}

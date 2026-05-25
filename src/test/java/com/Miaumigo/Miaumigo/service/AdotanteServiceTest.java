@@ -48,8 +48,8 @@ class AdotanteServiceTest {
 		assertEquals("Maria Silva", response.nome());
 		assertEquals("maria@email.com", response.email());
 		assertEquals("12345678901", response.cpf());
-		assertEquals(List.of(Tag.DOCIL, Tag.CASTRADO), response.preferencias());
-		assertEquals(List.of(Tag.DOCIL, Tag.CASTRADO), adotanteCaptor.getValue().getPreferencias());
+		assertEquals(List.of(Tag.DOCIL, Tag.CARINHOSO), response.preferencias());
+		assertEquals(List.of(Tag.DOCIL, Tag.CARINHOSO), adotanteCaptor.getValue().getPreferencias());
 	}
 
 	@Test
@@ -76,7 +76,7 @@ class AdotanteServiceTest {
 				email,
 				"senha123",
 				cpf,
-				List.of(Tag.DOCIL, Tag.CASTRADO)
+				List.of(Tag.DOCIL, Tag.CARINHOSO)
 		);
 	}
 }

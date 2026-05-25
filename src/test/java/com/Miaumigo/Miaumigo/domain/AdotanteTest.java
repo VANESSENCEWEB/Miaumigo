@@ -12,18 +12,18 @@ class AdotanteTest {
 
 	@Test
 	void deveCriarAdotante_quandoDadosValidos() {
-		Adotante adotante = novoAdotante(List.of(Tag.DOCIL, Tag.CASTRADO));
+		Adotante adotante = novoAdotante(List.of(Tag.DOCIL, Tag.CARINHOSO));
 
 		assertEquals("Maria Silva", adotante.getNome());
-		assertEquals(List.of(Tag.DOCIL, Tag.CASTRADO), adotante.getPreferencias());
+		assertEquals(List.of(Tag.DOCIL, Tag.CARINHOSO), adotante.getPreferencias());
 		assertEquals(List.of(), adotante.getLogs());
 	}
 
 	@Test
 	void deveNormalizarPreferencias_quandoPossuiDuplicadasOuNulas() {
-		Adotante adotante = novoAdotante(Arrays.asList(Tag.DOCIL, null, Tag.CASTRADO, Tag.DOCIL));
+		Adotante adotante = novoAdotante(Arrays.asList(Tag.DOCIL, null, Tag.CARINHOSO, Tag.DOCIL));
 
-		assertEquals(List.of(Tag.DOCIL, Tag.CASTRADO), adotante.getPreferencias());
+		assertEquals(List.of(Tag.DOCIL, Tag.CARINHOSO), adotante.getPreferencias());
 	}
 
 	@Test

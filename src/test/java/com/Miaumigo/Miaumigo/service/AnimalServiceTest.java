@@ -43,7 +43,7 @@ class AnimalServiceTest {
 				Porte.PEQUENO,
 				2,
 				"Dócil e tranquila",
-				List.of(Tag.DOCIL, Tag.CASTRADO),
+				List.of(Tag.DOCIL, Tag.CARINHOSO),
 				"animais/luna",
 				larId
 		);
@@ -59,7 +59,7 @@ class AnimalServiceTest {
 		assertEquals(Porte.PEQUENO, animalSalvo.getPorte());
 		assertEquals(2, animalSalvo.getIdade());
 		assertEquals("Dócil e tranquila", animalSalvo.getDescricao());
-		assertEquals(List.of(Tag.DOCIL, Tag.CASTRADO), animalSalvo.getTags());
+		assertEquals(List.of(Tag.DOCIL, Tag.CARINHOSO), animalSalvo.getTags());
 		assertEquals("animais/luna", animalSalvo.getCloudinaryPublicId());
 		assertEquals(larId, animalSalvo.getLarId());
 	}
@@ -148,7 +148,7 @@ class AnimalServiceTest {
 				2,
 				"Dócil",
 				UUID.randomUUID(),
-				List.of(Tag.DOCIL, Tag.CASTRADO),
+				List.of(Tag.DOCIL, Tag.CARINHOSO),
 				"animais/luna"
 		);
 		ReflectionTestUtils.setField(animal, "id", id);
@@ -161,7 +161,7 @@ class AnimalServiceTest {
 		assertEquals(2, response.idade());
 		assertEquals(Porte.PEQUENO, response.porte());
 		assertEquals(Especie.GATO, response.especie());
-		assertEquals(List.of(Tag.DOCIL, Tag.CASTRADO), response.tags());
+		assertEquals(List.of(Tag.DOCIL, Tag.CARINHOSO), response.tags());
 		assertEquals("animais/luna", response.cloudinaryPublicId());
 	}
 

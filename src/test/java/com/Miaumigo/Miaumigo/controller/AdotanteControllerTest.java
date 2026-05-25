@@ -2,9 +2,12 @@ package com.Miaumigo.Miaumigo.controller;
 
 import com.Miaumigo.Miaumigo.domain.Tag;
 import com.Miaumigo.Miaumigo.dto.AdotanteResponse;
+import com.Miaumigo.Miaumigo.dto.AnimalRecomendadoResponse;
 import com.Miaumigo.Miaumigo.exception.CpfJaCadastradoException;
 import com.Miaumigo.Miaumigo.exception.EmailJaCadastradoException;
+import com.Miaumigo.Miaumigo.exception.RecursoNaoEncontradoException;
 import com.Miaumigo.Miaumigo.service.AdotanteService;
+import com.Miaumigo.Miaumigo.service.MatchmakingService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -19,6 +22,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -32,6 +36,9 @@ class AdotanteControllerTest {
 	@MockitoBean
 	private AdotanteService adotanteService;
 
+	@MockitoBean
+	private MatchmakingService matchmakingService;
+
 	@Test
 	void deveCadastrarAdotante_quandoDadosValidos() throws Exception {
 		UUID id = UUID.fromString("22222222-2222-2222-2222-222222222222");
@@ -42,7 +49,7 @@ class AdotanteControllerTest {
 						"Rua das Flores, 123",
 						"maria@email.com",
 						"12345678901",
-						List.of(Tag.DOCIL, Tag.CASTRADO)
+						List.of(Tag.CALMO, Tag.CONVIVE_COM_GATOS)
 				));
 
 		mockMvc.perform(post("/api/v1/adotantes")
@@ -53,8 +60,8 @@ class AdotanteControllerTest {
 				.andExpect(jsonPath("$.nome").value("Maria Silva"))
 				.andExpect(jsonPath("$.email").value("maria@email.com"))
 				.andExpect(jsonPath("$.cpf").value("12345678901"))
-				.andExpect(jsonPath("$.preferencias[0]").value("DOCIL"))
-				.andExpect(jsonPath("$.preferencias[1]").value("CASTRADO"));
+				.andExpect(jsonPath("$.preferencias[0]").value("CALMO"))
+				.andExpect(jsonPath("$.preferencias[1]").value("CONVIVE_COM_GATOS"));
 
 		verify(adotanteService).cadastrar(any());
 	}
@@ -105,6 +112,38 @@ class AdotanteControllerTest {
 				.andExpect(jsonPath("$.erros").isArray());
 	}
 
+	@Test
+	void deveRetornarAnimaisOrdenados_quandoSolicitarRecomendacoes() throws Exception {
+		UUID adotanteId = UUID.fromString("22222222-2222-2222-2222-222222222222");
+		UUID lunaId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+		UUID thorId = UUID.fromString("33333333-3333-3333-3333-333333333333");
+		when(matchmakingService.recomendarAnimais(adotanteId))
+				.thenReturn(List.of(
+						new AnimalRecomendadoResponse(lunaId, "Luna", 2, null, null, List.of(Tag.CALMO, Tag.CONVIVE_COM_GATOS), "animais/luna", 2),
+						new AnimalRecomendadoResponse(thorId, "Thor", 3, null, null, List.of(Tag.ENERGICO), "animais/thor", 0)
+				));
+
+		mockMvc.perform(get("/api/v1/adotantes/{id}/animais-recomendados", adotanteId))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$[0].nome").value("Luna"))
+				.andExpect(jsonPath("$[0].compatibilidade").value(2))
+				.andExpect(jsonPath("$[1].nome").value("Thor"))
+				.andExpect(jsonPath("$[1].compatibilidade").value(0));
+
+		verify(matchmakingService).recomendarAnimais(adotanteId);
+	}
+
+	@Test
+	void deveRetornarNotFound_quandoAdotanteNaoExistirNasRecomendacoes() throws Exception {
+		UUID adotanteId = UUID.fromString("22222222-2222-2222-2222-222222222222");
+		doThrow(new RecursoNaoEncontradoException("Adotante não encontrado."))
+				.when(matchmakingService).recomendarAnimais(adotanteId);
+
+		mockMvc.perform(get("/api/v1/adotantes/{id}/animais-recomendados", adotanteId))
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.mensagem").value("Adotante não encontrado."));
+	}
+
 	private String requestValida() {
 		return """
 				{
@@ -113,7 +152,7 @@ class AdotanteControllerTest {
 					"email": "maria@email.com",
 					"senha": "senha123",
 					"cpf": "12345678901",
-					"preferencias": ["DOCIL", "CASTRADO"]
+					"preferencias": ["CALMO", "CONVIVE_COM_GATOS"]
 				}
 				""";
 	}
