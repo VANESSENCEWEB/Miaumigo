@@ -5,7 +5,7 @@ import com.Miaumigo.Miaumigo.domain.Animal;
 import com.Miaumigo.Miaumigo.domain.AnimalStatus;
 import com.Miaumigo.Miaumigo.domain.Tag;
 import com.Miaumigo.Miaumigo.dto.AnimalRecomendadoResponse;
-import com.Miaumigo.Miaumigo.exception.RecursoNaoEncontradoException;
+import com.Miaumigo.Miaumigo.exception.IdentidadeNaoAutenticadaException;
 import com.Miaumigo.Miaumigo.repository.AdotanteRepository;
 import com.Miaumigo.Miaumigo.repository.AnimalRepository;
 import org.springframework.stereotype.Service;
@@ -29,8 +29,8 @@ public class MatchmakingService {
 
 	@Transactional(readOnly = true)
 	public List<AnimalRecomendadoResponse> recomendarAnimais(UUID adotanteId) {
-		Adotante adotante = adotanteRepository.findById(adotanteId)
-				.orElseThrow(() -> new RecursoNaoEncontradoException("Adotante não encontrado."));
+			Adotante adotante = adotanteRepository.findById(adotanteId)
+					.orElseThrow(() -> new IdentidadeNaoAutenticadaException("Adotante não autenticado."));
 		List<Animal> animaisDisponiveis = animalRepository.findByStatus(AnimalStatus.DISPONIVEL);
 		List<AnimalRecomendadoResponse> recomendacoes = new ArrayList<>();
 

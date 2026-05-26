@@ -1,12 +1,14 @@
 package com.Miaumigo.Miaumigo.controller;
 
 import com.Miaumigo.Miaumigo.domain.Especie;
+import com.Miaumigo.Miaumigo.domain.AnimalStatus;
 import com.Miaumigo.Miaumigo.domain.Porte;
 import com.Miaumigo.Miaumigo.domain.Tag;
-import com.Miaumigo.Miaumigo.dto.AcaoRealizadaResponse;
 import com.Miaumigo.Miaumigo.dto.AnimalResponse;
+import com.Miaumigo.Miaumigo.dto.SolicitacaoAdocaoResponse;
 import com.Miaumigo.Miaumigo.exception.RecursoNaoEncontradoException;
 import com.Miaumigo.Miaumigo.service.AnimalService;
+import com.Miaumigo.Miaumigo.service.SolicitacaoAdocaoService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -16,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.UUID;
 import java.util.List;
+import java.time.LocalDateTime;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -37,6 +40,9 @@ class AnimalControllerTest {
 	@MockitoBean
 	private AnimalService animalService;
 
+	@MockitoBean
+	private SolicitacaoAdocaoService solicitacaoService;
+
 	@Test
 	void deveCadastrarAnimal_quandoDadosValidos() throws Exception {
 		String request = """
@@ -47,18 +53,18 @@ class AnimalControllerTest {
 					"idade": 2,
 					"descricao": "Dócil e tranquila",
 					"tags": ["DOCIL", "CARINHOSO"],
-					"cloudinary_public_id": "animais/luna",
-					"lar_id": "550e8400-e29b-41d4-a716-446655440000"
+					"cloudinary_public_id": "animais/luna"
 				}
 				""";
 
 		mockMvc.perform(post("/api/v1/animais")
+						.header("X-Usuario-Id", UUID.randomUUID())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(request))
 				.andExpect(status().isCreated())
 				.andExpect(content().string(""));
 
-		verify(animalService).cadastrar(any());
+		verify(animalService).cadastrar(any(), any());
 	}
 
 	@Test
@@ -82,18 +88,18 @@ class AnimalControllerTest {
 						"CONVIVE_COM_CRIANCAS",
 						"CONVIVE_COM_CAES",
 						"CONVIVE_COM_GATOS"
-					],
-					"lar_id": "550e8400-e29b-41d4-a716-446655440000"
+					]
 				}
 				""";
 
 		mockMvc.perform(post("/api/v1/animais")
+						.header("X-Usuario-Id", UUID.randomUUID())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(request))
 				.andExpect(status().isCreated());
 
 		verify(animalService).cadastrar(argThat(cadastro ->
-				cadastro.tags().equals(List.of(
+					cadastro.tags().equals(List.of(
 						Tag.BRINCALHAO,
 						Tag.CALMO,
 						Tag.INDEPENDENTE,
@@ -106,7 +112,7 @@ class AnimalControllerTest {
 						Tag.CONVIVE_COM_CRIANCAS,
 						Tag.CONVIVE_COM_CAES,
 						Tag.CONVIVE_COM_GATOS
-				))));
+					))), any());
 	}
 
 	@Test
@@ -116,12 +122,12 @@ class AnimalControllerTest {
 					"nome": "",
 					"especie": "GATO",
 					"porte": "PEQUENO",
-					"idade": -1,
-					"lar_id": "550e8400-e29b-41d4-a716-446655440000"
+					"idade": -1
 				}
 				""";
 
 		mockMvc.perform(post("/api/v1/animais")
+						.header("X-Usuario-Id", UUID.randomUUID())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(request))
 				.andExpect(status().isBadRequest())
@@ -139,14 +145,14 @@ class AnimalControllerTest {
 					"idade": 2,
 					"descricao": "Dócil e tranquila",
 					"tags": ["DOCIL"],
-					"cloudinary_public_id": "animais/luna",
-					"lar_id": "550e8400-e29b-41d4-a716-446655440000"
+					"cloudinary_public_id": "animais/luna"
 				}
 				""";
-		doThrow(new IllegalArgumentException("Nome do animal é obrigatório."))
-				.when(animalService).cadastrar(any());
+			doThrow(new IllegalArgumentException("Nome do animal é obrigatório."))
+					.when(animalService).cadastrar(any(), any());
 
 		mockMvc.perform(post("/api/v1/animais")
+						.header("X-Usuario-Id", UUID.randomUUID())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(request))
 				.andExpect(status().isBadRequest())
@@ -164,14 +170,14 @@ class AnimalControllerTest {
 					"idade": 2,
 					"descricao": "Dócil e tranquila",
 					"tags": ["DOCIL"],
-					"cloudinary_public_id": "animais/luna",
-					"lar_id": "550e8400-e29b-41d4-a716-446655440000"
+					"cloudinary_public_id": "animais/luna"
 				}
 				""";
-		doThrow(new RuntimeException("Banco indisponível"))
-				.when(animalService).cadastrar(any());
+			doThrow(new RuntimeException("Banco indisponível"))
+					.when(animalService).cadastrar(any(), any());
 
 		mockMvc.perform(post("/api/v1/animais")
+						.header("X-Usuario-Id", UUID.randomUUID())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(request))
 				.andExpect(status().isInternalServerError())
@@ -180,54 +186,36 @@ class AnimalControllerTest {
 	}
 
 	@Test
-	void deveRealizarAdocao_quandoDadosValidos() throws Exception {
+	void deveSolicitarAdocao_quandoAdotanteInformado() throws Exception {
 		UUID id = UUID.fromString("11111111-1111-1111-1111-111111111111");
-		String request = """
-				{
-					"adotante_id": "22222222-2222-2222-2222-222222222222"
-				}
-				""";
-		when(animalService.realizarAdocao(any(), any()))
-				.thenReturn(new AcaoRealizadaResponse("Adoção realizada com sucesso."));
+		UUID adotanteId = UUID.fromString("22222222-2222-2222-2222-222222222222");
+		when(solicitacaoService.criar(id, adotanteId)).thenReturn(new SolicitacaoAdocaoResponse(
+				UUID.randomUUID(), id, "Luna", adotanteId, "Maria", com.Miaumigo.Miaumigo.domain.SolicitacaoStatus.PENDENTE,
+				LocalDateTime.now(), LocalDateTime.now()
+		));
 
-		mockMvc.perform(post("/api/v1/animais/{id}/adocao", id)
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(request))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.mensagem").value("Adoção realizada com sucesso."));
-
-		verify(animalService).realizarAdocao(any(), any());
+		mockMvc.perform(post("/api/v1/animais/{id}/solicitacoes", id)
+						.header("X-Usuario-Id", adotanteId))
+				.andExpect(status().isCreated())
+				.andExpect(jsonPath("$.status").value("PENDENTE"));
 	}
 
 	@Test
-	void deveRetornarBadRequest_quandoAdocaoSemAdotante() throws Exception {
-		UUID id = UUID.fromString("11111111-1111-1111-1111-111111111111");
-		String request = """
-				{}
-				""";
-
-		mockMvc.perform(post("/api/v1/animais/{id}/adocao", id)
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(request))
-				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$.mensagem").value("Dados inválidos"))
-				.andExpect(jsonPath("$.erros").isArray());
+	void deveRetornarUnauthorized_quandoSolicitacaoSemIdentidade() throws Exception {
+		mockMvc.perform(post("/api/v1/animais/{id}/solicitacoes", UUID.randomUUID()))
+				.andExpect(status().isUnauthorized())
+				.andExpect(jsonPath("$.mensagem").value("Header X-Usuario-Id é obrigatório."));
 	}
 
 	@Test
-	void deveRetornarNotFound_quandoAnimalNaoEncontradoParaAdocao() throws Exception {
+	void deveRetornarNotFound_quandoAnimalNaoEncontradoParaSolicitacao() throws Exception {
 		UUID id = UUID.fromString("11111111-1111-1111-1111-111111111111");
-		String request = """
-				{
-					"adotante_id": "22222222-2222-2222-2222-222222222222"
-				}
-				""";
+		UUID adotanteId = UUID.fromString("22222222-2222-2222-2222-222222222222");
 		doThrow(new RecursoNaoEncontradoException("Animal não encontrado."))
-				.when(animalService).realizarAdocao(any(), any());
+				.when(solicitacaoService).criar(any(), any());
 
-		mockMvc.perform(post("/api/v1/animais/{id}/adocao", id)
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(request))
+		mockMvc.perform(post("/api/v1/animais/{id}/solicitacoes", id)
+						.header("X-Usuario-Id", adotanteId))
 				.andExpect(status().isNotFound())
 				.andExpect(jsonPath("$.mensagem").value("Animal não encontrado."))
 				.andExpect(jsonPath("$.erros").isArray());
@@ -241,9 +229,11 @@ class AnimalControllerTest {
 						id,
 						"Luna",
 						2,
-						Porte.PEQUENO,
-						Especie.GATO,
-						List.of(Tag.DOCIL, Tag.CARINHOSO),
+							Porte.PEQUENO,
+							Especie.GATO,
+							"Dócil e tranquila",
+							AnimalStatus.DISPONIVEL,
+							List.of(Tag.DOCIL, Tag.CARINHOSO),
 						"animais/luna"
 				));
 
@@ -253,7 +243,9 @@ class AnimalControllerTest {
 				.andExpect(jsonPath("$.nome").value("Luna"))
 				.andExpect(jsonPath("$.idade").value(2))
 				.andExpect(jsonPath("$.porte").value("PEQUENO"))
-				.andExpect(jsonPath("$.especie").value("GATO"))
+					.andExpect(jsonPath("$.especie").value("GATO"))
+					.andExpect(jsonPath("$.descricao").value("Dócil e tranquila"))
+					.andExpect(jsonPath("$.status").value("DISPONIVEL"))
 				.andExpect(jsonPath("$.tags[0]").value("DOCIL"))
 				.andExpect(jsonPath("$.tags[1]").value("CARINHOSO"))
 				.andExpect(jsonPath("$.cloudinary_public_id").value("animais/luna"));

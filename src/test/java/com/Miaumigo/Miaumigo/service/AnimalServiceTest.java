@@ -6,13 +6,15 @@ import com.Miaumigo.Miaumigo.domain.AnimalStatus;
 import com.Miaumigo.Miaumigo.domain.Especie;
 import com.Miaumigo.Miaumigo.domain.Porte;
 import com.Miaumigo.Miaumigo.domain.Tag;
+import com.Miaumigo.Miaumigo.domain.Lar;
+import com.Miaumigo.Miaumigo.domain.Operador;
 import com.Miaumigo.Miaumigo.dto.AcaoRealizadaResponse;
 import com.Miaumigo.Miaumigo.dto.AnimalResponse;
 import com.Miaumigo.Miaumigo.dto.CadastroAnimalRequest;
-import com.Miaumigo.Miaumigo.dto.RealizarAdocaoRequest;
 import com.Miaumigo.Miaumigo.exception.RecursoNaoEncontradoException;
 import com.Miaumigo.Miaumigo.repository.AdotanteRepository;
 import com.Miaumigo.Miaumigo.repository.AnimalRepository;
+import com.Miaumigo.Miaumigo.repository.OperadorRepository;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -32,11 +34,16 @@ class AnimalServiceTest {
 
 	private final AnimalRepository animalRepository = mock(AnimalRepository.class);
 	private final AdotanteRepository adotanteRepository = mock(AdotanteRepository.class);
-	private final AnimalService animalService = new AnimalService(animalRepository, adotanteRepository);
+	private final OperadorRepository operadorRepository = mock(OperadorRepository.class);
+	private final AnimalService animalService = new AnimalService(animalRepository, adotanteRepository, operadorRepository);
 
 	@Test
 	void deveCadastrarAnimal_quandoDadosValidos() {
 		UUID larId = UUID.randomUUID();
+		UUID operadorId = UUID.randomUUID();
+		Lar lar = new Lar("Lar Amigo");
+		ReflectionTestUtils.setField(lar, "id", larId);
+		Operador operador = new Operador("Responsavel", "Rua A", "operador@email.com", "senha", "12345678901", lar);
 		CadastroAnimalRequest request = new CadastroAnimalRequest(
 				"Luna",
 				Especie.GATO,
@@ -44,12 +51,12 @@ class AnimalServiceTest {
 				2,
 				"Dócil e tranquila",
 				List.of(Tag.DOCIL, Tag.CARINHOSO),
-				"animais/luna",
-				larId
+				"animais/luna"
 		);
+		when(operadorRepository.findById(operadorId)).thenReturn(Optional.of(operador));
 		when(animalRepository.save(any(Animal.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-		animalService.cadastrar(request);
+		animalService.cadastrar(request, operadorId);
 
 		ArgumentCaptor<Animal> animalCaptor = ArgumentCaptor.forClass(Animal.class);
 		verify(animalRepository).save(animalCaptor.capture());
@@ -62,61 +69,6 @@ class AnimalServiceTest {
 		assertEquals(List.of(Tag.DOCIL, Tag.CARINHOSO), animalSalvo.getTags());
 		assertEquals("animais/luna", animalSalvo.getCloudinaryPublicId());
 		assertEquals(larId, animalSalvo.getLarId());
-	}
-
-	@Test
-	void deveRealizarAdocao_quandoAnimalExistir() {
-		UUID id = UUID.randomUUID();
-		UUID adotanteId = UUID.randomUUID();
-		Animal animal = new Animal("Luna", Especie.GATO, Porte.PEQUENO, 2, "Dócil", UUID.randomUUID());
-		Adotante adotante = novoAdotante("Maria Silva");
-		RealizarAdocaoRequest request = new RealizarAdocaoRequest(adotanteId);
-		when(animalRepository.findById(id)).thenReturn(Optional.of(animal));
-		when(adotanteRepository.findById(adotanteId)).thenReturn(Optional.of(adotante));
-		when(animalRepository.save(any(Animal.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-		AcaoRealizadaResponse response = animalService.realizarAdocao(id, request);
-
-		ArgumentCaptor<Animal> animalCaptor = ArgumentCaptor.forClass(Animal.class);
-		verify(animalRepository).save(animalCaptor.capture());
-		Animal animalSalvo = animalCaptor.getValue();
-		assertEquals("Adoção realizada com sucesso.", response.mensagem());
-		assertEquals(AnimalStatus.ADOTADO, animalSalvo.getStatus());
-		assertEquals(adotante, animalSalvo.getAdotanteAtual());
-		assertEquals("Adotado por Maria Silva.", animalSalvo.getLogs().get(1));
-		assertEquals("Adotou Luna.", adotante.getLogs().getFirst());
-	}
-
-	@Test
-	void deveLancarExcecao_quandoAnimalNaoEncontradoParaAdocao() {
-		UUID id = UUID.randomUUID();
-		RealizarAdocaoRequest request = new RealizarAdocaoRequest(UUID.randomUUID());
-		when(animalRepository.findById(id)).thenReturn(Optional.empty());
-
-		RecursoNaoEncontradoException exception = assertThrows(
-				RecursoNaoEncontradoException.class,
-				() -> animalService.realizarAdocao(id, request)
-		);
-
-		assertEquals("Animal não encontrado.", exception.getMessage());
-	}
-
-	@Test
-	void deveLancarExcecao_quandoAdotanteNaoEncontradoParaAdocao() {
-		UUID id = UUID.randomUUID();
-		UUID adotanteId = UUID.randomUUID();
-		RealizarAdocaoRequest request = new RealizarAdocaoRequest(adotanteId);
-		when(animalRepository.findById(id)).thenReturn(Optional.of(
-				new Animal("Luna", Especie.GATO, Porte.PEQUENO, 2, "Dócil", UUID.randomUUID())
-		));
-		when(adotanteRepository.findById(adotanteId)).thenReturn(Optional.empty());
-
-		RecursoNaoEncontradoException exception = assertThrows(
-				RecursoNaoEncontradoException.class,
-				() -> animalService.realizarAdocao(id, request)
-		);
-
-		assertEquals("Adotante não encontrado.", exception.getMessage());
 	}
 
 	@Test

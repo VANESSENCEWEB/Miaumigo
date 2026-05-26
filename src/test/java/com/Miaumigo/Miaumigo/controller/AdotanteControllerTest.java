@@ -8,6 +8,7 @@ import com.Miaumigo.Miaumigo.exception.EmailJaCadastradoException;
 import com.Miaumigo.Miaumigo.exception.RecursoNaoEncontradoException;
 import com.Miaumigo.Miaumigo.service.AdotanteService;
 import com.Miaumigo.Miaumigo.service.MatchmakingService;
+import com.Miaumigo.Miaumigo.service.SolicitacaoAdocaoService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -38,6 +39,9 @@ class AdotanteControllerTest {
 
 	@MockitoBean
 	private MatchmakingService matchmakingService;
+
+	@MockitoBean
+	private SolicitacaoAdocaoService solicitacaoService;
 
 	@Test
 	void deveCadastrarAdotante_quandoDadosValidos() throws Exception {
@@ -123,7 +127,8 @@ class AdotanteControllerTest {
 						new AnimalRecomendadoResponse(thorId, "Thor", 3, null, null, List.of(Tag.ENERGICO), "animais/thor", 0)
 				));
 
-		mockMvc.perform(get("/api/v1/adotantes/{id}/animais-recomendados", adotanteId))
+		mockMvc.perform(get("/api/v1/adotantes/me/animais-recomendados")
+						.header("X-Usuario-Id", adotanteId))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$[0].nome").value("Luna"))
 				.andExpect(jsonPath("$[0].compatibilidade").value(2))
@@ -139,7 +144,8 @@ class AdotanteControllerTest {
 		doThrow(new RecursoNaoEncontradoException("Adotante não encontrado."))
 				.when(matchmakingService).recomendarAnimais(adotanteId);
 
-		mockMvc.perform(get("/api/v1/adotantes/{id}/animais-recomendados", adotanteId))
+		mockMvc.perform(get("/api/v1/adotantes/me/animais-recomendados")
+						.header("X-Usuario-Id", adotanteId))
 				.andExpect(status().isNotFound())
 				.andExpect(jsonPath("$.mensagem").value("Adotante não encontrado."));
 	}

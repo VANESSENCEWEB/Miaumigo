@@ -9,7 +9,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 
 import java.util.List;
-import java.util.UUID;
 
 public record CadastroAnimalRequest(
 		@NotBlank(message = "Nome do animal é obrigatório")
@@ -30,11 +29,7 @@ public record CadastroAnimalRequest(
 
 
 		//Verificar se esse realmente é o nome da chave dada pelo cloudnary
-		@JsonProperty("cloudinary_public_id")
-		String cloudinaryPublicId,
-
-		@JsonProperty("lar_id")
-		@NotNull(message = "Lar do animal é obrigatório")
-		UUID larId
+			@JsonProperty("cloudinary_public_id")
+			String cloudinaryPublicId
 ) {
 }

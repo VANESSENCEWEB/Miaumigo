@@ -7,7 +7,7 @@ import com.Miaumigo.Miaumigo.domain.Especie;
 import com.Miaumigo.Miaumigo.domain.Porte;
 import com.Miaumigo.Miaumigo.domain.Tag;
 import com.Miaumigo.Miaumigo.dto.AnimalRecomendadoResponse;
-import com.Miaumigo.Miaumigo.exception.RecursoNaoEncontradoException;
+import com.Miaumigo.Miaumigo.exception.IdentidadeNaoAutenticadaException;
 import com.Miaumigo.Miaumigo.repository.AdotanteRepository;
 import com.Miaumigo.Miaumigo.repository.AnimalRepository;
 import org.junit.jupiter.api.Test;
@@ -90,12 +90,12 @@ class MatchmakingServiceTest {
 		UUID adotanteId = UUID.randomUUID();
 		when(adotanteRepository.findById(adotanteId)).thenReturn(Optional.empty());
 
-		RecursoNaoEncontradoException exception = assertThrows(
-				RecursoNaoEncontradoException.class,
+		IdentidadeNaoAutenticadaException exception = assertThrows(
+				IdentidadeNaoAutenticadaException.class,
 				() -> matchmakingService.recomendarAnimais(adotanteId)
 		);
 
-		assertEquals("Adotante não encontrado.", exception.getMessage());
+		assertEquals("Adotante não autenticado.", exception.getMessage());
 	}
 
 	private Adotante novoAdotante(List<Tag> preferencias) {
