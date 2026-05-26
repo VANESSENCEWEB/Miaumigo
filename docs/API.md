@@ -68,6 +68,7 @@ CONVIVE_COM_GATOS
 | `GET` | `/adotantes/{id}/animais-recomendados` | Lista animais disponiveis ranqueados para o adotante |
 | `POST` | `/animais` | Cadastra um animal |
 | `GET` | `/animais/{id}` | Busca os dados publicos de um animal |
+| `POST` | `/animais/{id}/texto-divulgacao` | Gera uma legenda para divulgar um animal disponivel |
 | `POST` | `/animais/{id}/adocao` | Registra a adocao de um animal por um adotante |
 
 ## Adotantes
@@ -237,6 +238,36 @@ GET /api/v1/animais/{id}
 ```
 
 Nota de integracao: `descricao`, `status` e `lar_id` nao fazem parte desta resposta no backend atual.
+
+### Gerar Texto de Divulgacao
+
+```http
+POST /api/v1/animais/{id}/texto-divulgacao
+```
+
+Gera, via Gemini, uma legenda curta em portugues pronta para divulgacao em redes sociais. O backend usa os dados cadastrados do animal; nenhum corpo de request e necessario. Somente animais com status `DISPONIVEL` podem ser divulgados.
+
+**Configuracao do backend**
+
+```text
+GEMINI_API_KEY=<chave da API Gemini>
+```
+
+**Resposta `200 OK`**
+
+```json
+{
+  "texto": "Luna e uma gatinha carinhosa esperando por um lar! Venha conhecer e adotar. #Adote #AdocaoResponsavel"
+}
+```
+
+**Erros relevantes**
+
+| Status | Quando ocorre |
+| --- | --- |
+| `400 Bad Request` | Animal nao esta disponivel para adocao |
+| `404 Not Found` | Animal informado nao existe |
+| `502 Bad Gateway` | Gemini nao respondeu ou nao retornou texto valido |
 
 ### Registrar Adocao
 
