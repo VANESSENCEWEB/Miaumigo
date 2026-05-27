@@ -3,6 +3,7 @@ package com.Miaumigo.Miaumigo.exception;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -67,9 +68,21 @@ public class ApiExceptionHandler {
 		return new ErroResponse(exception.getMessage(), List.of());
 	}
 
-	@ExceptionHandler(IntegracaoGeminiException.class)
-	@ResponseStatus(HttpStatus.BAD_GATEWAY)
-	public ErroResponse tratarErroIntegracaoGemini(IntegracaoGeminiException exception) {
+	@ExceptionHandler(MissingRequestHeaderException.class)
+	@ResponseStatus(HttpStatus.UNAUTHORIZED)
+	public ErroResponse tratarHeaderIdentidadeAusente(MissingRequestHeaderException exception) {
+		return new ErroResponse("Header X-Usuario-Id é obrigatório.", List.of());
+	}
+
+	@ExceptionHandler(IdentidadeNaoAutenticadaException.class)
+	@ResponseStatus(HttpStatus.UNAUTHORIZED)
+	public ErroResponse tratarIdentidadeNaoAutenticada(IdentidadeNaoAutenticadaException exception) {
+		return new ErroResponse(exception.getMessage(), List.of());
+	}
+
+	@ExceptionHandler(AcessoNegadoException.class)
+	@ResponseStatus(HttpStatus.FORBIDDEN)
+	public ErroResponse tratarAcessoNegado(AcessoNegadoException exception) {
 		return new ErroResponse(exception.getMessage(), List.of());
 	}
 
