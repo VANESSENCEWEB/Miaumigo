@@ -264,4 +264,54 @@ class AnimalControllerTest {
 				.andExpect(jsonPath("$.mensagem").value("Animal não encontrado"))
 				.andExpect(jsonPath("$.erros").isArray());
 	}
+
+	@Test
+	void deveGerarTextoDivulgacao_quandoAnimalDisponivel() throws Exception {
+		UUID id = UUID.fromString("11111111-1111-1111-1111-111111111111");
+		when(textoDivulgacaoService.gerar(id))
+				.thenReturn(new TextoDivulgacaoResponse("Luna está esperando por uma família! #Adote"));
+
+		mockMvc.perform(post("/api/v1/animais/{id}/texto-divulgacao", id))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.texto").value("Luna está esperando por uma família! #Adote"));
+
+		verify(textoDivulgacaoService).gerar(id);
+	}
+
+	@Test
+	void deveRetornarBadGateway_quandoGeminiFalhar() throws Exception {
+		UUID id = UUID.fromString("11111111-1111-1111-1111-111111111111");
+		doThrow(new IntegracaoGeminiException("Não foi possível gerar o texto de divulgação."))
+				.when(textoDivulgacaoService).gerar(id);
+
+		mockMvc.perform(post("/api/v1/animais/{id}/texto-divulgacao", id))
+				.andExpect(status().isBadGateway())
+				.andExpect(jsonPath("$.mensagem").value("Não foi possível gerar o texto de divulgação."))
+				.andExpect(jsonPath("$.erros").isArray());
+	}
+
+	@Test
+	void deveRetornarBadRequest_quandoAnimalNaoEstiverDisponivelParaDivulgacao() throws Exception {
+		UUID id = UUID.fromString("11111111-1111-1111-1111-111111111111");
+		doThrow(new IllegalStateException("Somente animais disponíveis podem ter texto de divulgação gerado."))
+				.when(textoDivulgacaoService).gerar(id);
+
+		mockMvc.perform(post("/api/v1/animais/{id}/texto-divulgacao", id))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.mensagem")
+						.value("Somente animais disponíveis podem ter texto de divulgação gerado."))
+				.andExpect(jsonPath("$.erros").isArray());
+	}
+
+	@Test
+	void deveRetornarNotFound_quandoAnimalDaDivulgacaoNaoExistir() throws Exception {
+		UUID id = UUID.fromString("11111111-1111-1111-1111-111111111111");
+		doThrow(new RecursoNaoEncontradoException("Animal não encontrado."))
+				.when(textoDivulgacaoService).gerar(id);
+
+		mockMvc.perform(post("/api/v1/animais/{id}/texto-divulgacao", id))
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.mensagem").value("Animal não encontrado."))
+				.andExpect(jsonPath("$.erros").isArray());
+	}
 }

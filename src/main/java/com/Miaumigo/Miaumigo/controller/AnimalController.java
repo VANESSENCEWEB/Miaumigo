@@ -52,4 +52,9 @@ public class AnimalController {
 		) {
 		return solicitacaoService.criar(id, usuarioId);
 	}
+
+	@PostMapping("/{id}/texto-divulgacao")
+	public TextoDivulgacaoResponse gerarTextoDivulgacao(@PathVariable UUID id) {
+		return textoDivulgacaoService.gerar(id);
+	}
 }

@@ -50,6 +50,14 @@ class ApiExceptionHandlerTest {
 				.andExpect(jsonPath("$.erros").isArray());
 	}
 
+	@Test
+	void deveRetornarBadGateway_quandoGeminiIndisponivel() throws Exception {
+		mockMvc.perform(get("/teste/gemini-indisponivel"))
+				.andExpect(status().isBadGateway())
+				.andExpect(jsonPath("$.mensagem").value("Não foi possível gerar o texto de divulgação."))
+				.andExpect(jsonPath("$.erros").isArray());
+	}
+
 	@RestController
 	static class TestController {
 
@@ -77,6 +85,11 @@ class ApiExceptionHandlerTest {
 					"Erro de integridade",
 					new RuntimeException("duplicate key value violates unique constraint \"uk_usuarios_cpf\"")
 			);
+		}
+
+		@GetMapping("/teste/gemini-indisponivel")
+		void geminiIndisponivel() {
+			throw new IntegracaoGeminiException("Não foi possível gerar o texto de divulgação.");
 		}
 	}
 }
