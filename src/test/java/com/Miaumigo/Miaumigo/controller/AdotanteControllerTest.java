@@ -6,11 +6,13 @@ import com.Miaumigo.Miaumigo.dto.AnimalRecomendadoResponse;
 import com.Miaumigo.Miaumigo.exception.CpfJaCadastradoException;
 import com.Miaumigo.Miaumigo.exception.EmailJaCadastradoException;
 import com.Miaumigo.Miaumigo.exception.RecursoNaoEncontradoException;
+import com.Miaumigo.Miaumigo.security.UsuarioAutenticadoService;
 import com.Miaumigo.Miaumigo.service.AdotanteService;
 import com.Miaumigo.Miaumigo.service.MatchmakingService;
 import com.Miaumigo.Miaumigo.service.SolicitacaoAdocaoService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -29,6 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AdotanteController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class AdotanteControllerTest {
 
 	@Autowired
@@ -42,6 +45,9 @@ class AdotanteControllerTest {
 
 	@MockitoBean
 	private SolicitacaoAdocaoService solicitacaoService;
+
+	@MockitoBean
+	private UsuarioAutenticadoService usuarioAutenticadoService;
 
 	@Test
 	void deveCadastrarAdotante_quandoDadosValidos() throws Exception {
@@ -121,6 +127,7 @@ class AdotanteControllerTest {
 		UUID adotanteId = UUID.fromString("22222222-2222-2222-2222-222222222222");
 		UUID lunaId = UUID.fromString("11111111-1111-1111-1111-111111111111");
 		UUID thorId = UUID.fromString("33333333-3333-3333-3333-333333333333");
+		when(usuarioAutenticadoService.exigirAdotante(any())).thenReturn(adotanteId);
 		when(matchmakingService.recomendarAnimais(adotanteId))
 				.thenReturn(List.of(
 						new AnimalRecomendadoResponse(lunaId, "Luna", 2, null, null, List.of(Tag.CALMO, Tag.CONVIVE_COM_GATOS), "animais/luna", 2),
@@ -128,7 +135,7 @@ class AdotanteControllerTest {
 				));
 
 		mockMvc.perform(get("/api/v1/adotantes/me/animais-recomendados")
-						.header("X-Usuario-Id", adotanteId))
+						.header("Authorization", "Bearer token"))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$[0].nome").value("Luna"))
 				.andExpect(jsonPath("$[0].compatibilidade").value(2))
@@ -141,11 +148,12 @@ class AdotanteControllerTest {
 	@Test
 	void deveRetornarNotFound_quandoAdotanteNaoExistirNasRecomendacoes() throws Exception {
 		UUID adotanteId = UUID.fromString("22222222-2222-2222-2222-222222222222");
+		when(usuarioAutenticadoService.exigirAdotante(any())).thenReturn(adotanteId);
 		doThrow(new RecursoNaoEncontradoException("Adotante não encontrado."))
 				.when(matchmakingService).recomendarAnimais(adotanteId);
 
 		mockMvc.perform(get("/api/v1/adotantes/me/animais-recomendados")
-						.header("X-Usuario-Id", adotanteId))
+						.header("Authorization", "Bearer token"))
 				.andExpect(status().isNotFound())
 				.andExpect(jsonPath("$.mensagem").value("Adotante não encontrado."));
 	}

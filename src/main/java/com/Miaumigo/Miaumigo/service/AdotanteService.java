@@ -7,6 +7,7 @@ import com.Miaumigo.Miaumigo.exception.CpfJaCadastradoException;
 import com.Miaumigo.Miaumigo.exception.EmailJaCadastradoException;
 import com.Miaumigo.Miaumigo.repository.AdotanteRepository;
 import com.Miaumigo.Miaumigo.repository.UsuarioRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,10 +16,16 @@ public class AdotanteService {
 
 	private final AdotanteRepository adotanteRepository;
 	private final UsuarioRepository usuarioRepository;
+	private final PasswordEncoder passwordEncoder;
 
-	public AdotanteService(AdotanteRepository adotanteRepository, UsuarioRepository usuarioRepository) {
+	public AdotanteService(
+			AdotanteRepository adotanteRepository,
+			UsuarioRepository usuarioRepository,
+			PasswordEncoder passwordEncoder
+	) {
 		this.adotanteRepository = adotanteRepository;
 		this.usuarioRepository = usuarioRepository;
+		this.passwordEncoder = passwordEncoder;
 	}
 
 	@Transactional
@@ -35,7 +42,7 @@ public class AdotanteService {
 				request.nome(),
 				request.endereco(),
 				request.email(),
-				request.senha(),
+				passwordEncoder.encode(request.senha()),
 				request.cpf(),
 				request.preferencias()
 		);
