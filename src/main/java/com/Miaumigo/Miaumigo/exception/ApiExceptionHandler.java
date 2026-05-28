@@ -86,6 +86,12 @@ public class ApiExceptionHandler {
 		return new ErroResponse(exception.getMessage(), List.of());
 	}
 
+	@ExceptionHandler(IntegracaoGeminiException.class)
+	@ResponseStatus(HttpStatus.BAD_GATEWAY)
+	public ErroResponse tratarIntegracaoGemini(IntegracaoGeminiException exception) {
+		return new ErroResponse(exception.getMessage(), List.of());
+	}
+
 	@ExceptionHandler(Exception.class)
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public ErroResponse tratarErroInterno(Exception exception) {

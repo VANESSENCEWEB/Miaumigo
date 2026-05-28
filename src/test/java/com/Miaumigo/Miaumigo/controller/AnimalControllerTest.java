@@ -6,9 +6,12 @@ import com.Miaumigo.Miaumigo.domain.Porte;
 import com.Miaumigo.Miaumigo.domain.Tag;
 import com.Miaumigo.Miaumigo.dto.AnimalResponse;
 import com.Miaumigo.Miaumigo.dto.SolicitacaoAdocaoResponse;
+import com.Miaumigo.Miaumigo.dto.TextoDivulgacaoResponse;
+import com.Miaumigo.Miaumigo.exception.IntegracaoGeminiException;
 import com.Miaumigo.Miaumigo.exception.RecursoNaoEncontradoException;
 import com.Miaumigo.Miaumigo.service.AnimalService;
 import com.Miaumigo.Miaumigo.service.SolicitacaoAdocaoService;
+import com.Miaumigo.Miaumigo.service.TextoDivulgacaoService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -42,6 +45,9 @@ class AnimalControllerTest {
 
 	@MockitoBean
 	private SolicitacaoAdocaoService solicitacaoService;
+
+	@MockitoBean
+	private TextoDivulgacaoService textoDivulgacaoService;
 
 	@Test
 	void deveCadastrarAnimal_quandoDadosValidos() throws Exception {
