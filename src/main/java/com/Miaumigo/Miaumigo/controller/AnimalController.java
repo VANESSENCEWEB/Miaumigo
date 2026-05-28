@@ -3,8 +3,10 @@ package com.Miaumigo.Miaumigo.controller;
 import com.Miaumigo.Miaumigo.dto.AnimalResponse;
 import com.Miaumigo.Miaumigo.dto.CadastroAnimalRequest;
 import com.Miaumigo.Miaumigo.dto.SolicitacaoAdocaoResponse;
+import com.Miaumigo.Miaumigo.dto.TextoDivulgacaoResponse;
 import com.Miaumigo.Miaumigo.service.AnimalService;
 import com.Miaumigo.Miaumigo.service.SolicitacaoAdocaoService;
+import com.Miaumigo.Miaumigo.service.TextoDivulgacaoService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,10 +26,16 @@ public class AnimalController {
 
 	private final AnimalService animalService;
 	private final SolicitacaoAdocaoService solicitacaoService;
+	private final TextoDivulgacaoService textoDivulgacaoService;
 
-	public AnimalController(AnimalService animalService, SolicitacaoAdocaoService solicitacaoService) {
+	public AnimalController(
+			AnimalService animalService,
+			SolicitacaoAdocaoService solicitacaoService,
+			TextoDivulgacaoService textoDivulgacaoService
+	) {
 		this.animalService = animalService;
 		this.solicitacaoService = solicitacaoService;
+		this.textoDivulgacaoService = textoDivulgacaoService;
 	}
 
 	@PostMapping
