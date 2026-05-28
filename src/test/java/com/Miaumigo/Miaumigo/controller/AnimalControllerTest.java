@@ -7,13 +7,17 @@ import com.Miaumigo.Miaumigo.domain.Tag;
 import com.Miaumigo.Miaumigo.dto.AnimalResponse;
 import com.Miaumigo.Miaumigo.dto.SolicitacaoAdocaoResponse;
 import com.Miaumigo.Miaumigo.dto.TextoDivulgacaoResponse;
+import com.Miaumigo.Miaumigo.exception.IdentidadeNaoAutenticadaException;
 import com.Miaumigo.Miaumigo.exception.IntegracaoGeminiException;
 import com.Miaumigo.Miaumigo.exception.RecursoNaoEncontradoException;
+import com.Miaumigo.Miaumigo.security.UsuarioAutenticadoService;
 import com.Miaumigo.Miaumigo.service.AnimalService;
 import com.Miaumigo.Miaumigo.service.SolicitacaoAdocaoService;
 import com.Miaumigo.Miaumigo.service.TextoDivulgacaoService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -35,6 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AnimalController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class AnimalControllerTest {
 
 	@Autowired
@@ -49,6 +54,15 @@ class AnimalControllerTest {
 	@MockitoBean
 	private TextoDivulgacaoService textoDivulgacaoService;
 
+	@MockitoBean
+	private UsuarioAutenticadoService usuarioAutenticadoService;
+
+	@BeforeEach
+	void configurarIdentidade() {
+		when(usuarioAutenticadoService.exigirOperador(any())).thenReturn(UUID.randomUUID());
+		when(usuarioAutenticadoService.exigirOperadorOuAdmin(any())).thenReturn(UUID.randomUUID());
+	}
+
 	@Test
 	void deveCadastrarAnimal_quandoDadosValidos() throws Exception {
 		String request = """
@@ -61,10 +75,9 @@ class AnimalControllerTest {
 					"tags": ["DOCIL", "CARINHOSO"],
 					"cloudinary_public_id": "animais/luna"
 				}
-				""";
+		""";
 
 		mockMvc.perform(post("/api/v1/animais")
-						.header("X-Usuario-Id", UUID.randomUUID())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(request))
 				.andExpect(status().isCreated())
@@ -99,7 +112,6 @@ class AnimalControllerTest {
 				""";
 
 		mockMvc.perform(post("/api/v1/animais")
-						.header("X-Usuario-Id", UUID.randomUUID())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(request))
 				.andExpect(status().isCreated());
@@ -133,7 +145,6 @@ class AnimalControllerTest {
 				""";
 
 		mockMvc.perform(post("/api/v1/animais")
-						.header("X-Usuario-Id", UUID.randomUUID())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(request))
 				.andExpect(status().isBadRequest())
@@ -158,7 +169,6 @@ class AnimalControllerTest {
 					.when(animalService).cadastrar(any(), any());
 
 		mockMvc.perform(post("/api/v1/animais")
-						.header("X-Usuario-Id", UUID.randomUUID())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(request))
 				.andExpect(status().isBadRequest())
@@ -183,7 +193,6 @@ class AnimalControllerTest {
 					.when(animalService).cadastrar(any(), any());
 
 		mockMvc.perform(post("/api/v1/animais")
-						.header("X-Usuario-Id", UUID.randomUUID())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(request))
 				.andExpect(status().isInternalServerError())
@@ -195,33 +204,38 @@ class AnimalControllerTest {
 	void deveSolicitarAdocao_quandoAdotanteInformado() throws Exception {
 		UUID id = UUID.fromString("11111111-1111-1111-1111-111111111111");
 		UUID adotanteId = UUID.fromString("22222222-2222-2222-2222-222222222222");
+		when(usuarioAutenticadoService.exigirAdotante(any())).thenReturn(adotanteId);
 		when(solicitacaoService.criar(id, adotanteId)).thenReturn(new SolicitacaoAdocaoResponse(
 				UUID.randomUUID(), id, "Luna", adotanteId, "Maria", com.Miaumigo.Miaumigo.domain.SolicitacaoStatus.PENDENTE,
 				LocalDateTime.now(), LocalDateTime.now()
 		));
 
 		mockMvc.perform(post("/api/v1/animais/{id}/solicitacoes", id)
-						.header("X-Usuario-Id", adotanteId))
+						.header("Authorization", "Bearer token"))
 				.andExpect(status().isCreated())
 				.andExpect(jsonPath("$.status").value("PENDENTE"));
 	}
 
 	@Test
 	void deveRetornarUnauthorized_quandoSolicitacaoSemIdentidade() throws Exception {
+		doThrow(new IdentidadeNaoAutenticadaException("Usuário não autenticado."))
+				.when(usuarioAutenticadoService).exigirAdotante(any());
+
 		mockMvc.perform(post("/api/v1/animais/{id}/solicitacoes", UUID.randomUUID()))
 				.andExpect(status().isUnauthorized())
-				.andExpect(jsonPath("$.mensagem").value("Header X-Usuario-Id é obrigatório."));
+				.andExpect(jsonPath("$.mensagem").value("Usuário não autenticado."));
 	}
 
 	@Test
 	void deveRetornarNotFound_quandoAnimalNaoEncontradoParaSolicitacao() throws Exception {
 		UUID id = UUID.fromString("11111111-1111-1111-1111-111111111111");
 		UUID adotanteId = UUID.fromString("22222222-2222-2222-2222-222222222222");
+		when(usuarioAutenticadoService.exigirAdotante(any())).thenReturn(adotanteId);
 		doThrow(new RecursoNaoEncontradoException("Animal não encontrado."))
 				.when(solicitacaoService).criar(any(), any());
 
 		mockMvc.perform(post("/api/v1/animais/{id}/solicitacoes", id)
-						.header("X-Usuario-Id", adotanteId))
+						.header("Authorization", "Bearer token"))
 				.andExpect(status().isNotFound())
 				.andExpect(jsonPath("$.mensagem").value("Animal não encontrado."))
 				.andExpect(jsonPath("$.erros").isArray());

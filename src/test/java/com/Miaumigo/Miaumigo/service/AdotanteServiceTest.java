@@ -10,12 +10,16 @@ import com.Miaumigo.Miaumigo.repository.AdotanteRepository;
 import com.Miaumigo.Miaumigo.repository.UsuarioRepository;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -26,7 +30,10 @@ class AdotanteServiceTest {
 
 	private final AdotanteRepository adotanteRepository = mock(AdotanteRepository.class);
 	private final UsuarioRepository usuarioRepository = mock(UsuarioRepository.class);
-	private final AdotanteService adotanteService = new AdotanteService(adotanteRepository, usuarioRepository);
+	private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+	private final AdotanteService adotanteService = new AdotanteService(
+			adotanteRepository, usuarioRepository, passwordEncoder
+	);
 
 	@Test
 	void deveCadastrarAdotante_quandoDadosValidos() {
@@ -50,6 +57,8 @@ class AdotanteServiceTest {
 		assertEquals("12345678901", response.cpf());
 		assertEquals(List.of(Tag.DOCIL, Tag.CARINHOSO), response.preferencias());
 		assertEquals(List.of(Tag.DOCIL, Tag.CARINHOSO), adotanteCaptor.getValue().getPreferencias());
+		assertNotEquals("senha123", adotanteCaptor.getValue().getSenha());
+		assertTrue(passwordEncoder.matches("senha123", adotanteCaptor.getValue().getSenha()));
 	}
 
 	@Test
