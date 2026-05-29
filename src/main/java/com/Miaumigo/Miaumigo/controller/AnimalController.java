@@ -1,5 +1,6 @@
 package com.Miaumigo.Miaumigo.controller;
 
+import com.Miaumigo.Miaumigo.domain.AnimalStatus;
 import com.Miaumigo.Miaumigo.dto.AnimalResponse;
 import com.Miaumigo.Miaumigo.dto.CadastroAnimalRequest;
 import com.Miaumigo.Miaumigo.dto.SolicitacaoAdocaoResponse;
@@ -17,9 +18,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -50,6 +53,14 @@ public class AnimalController {
 			@AuthenticationPrincipal Jwt jwt
 	) {
 		animalService.cadastrar(request, usuarioAutenticadoService.exigirOperador(jwt));
+	}
+
+	@GetMapping
+	public List<AnimalResponse> listarDisponiveis(@RequestParam(required = false) AnimalStatus status) {
+		if (status != null && status != AnimalStatus.DISPONIVEL) {
+			throw new IllegalArgumentException("Somente animais disponíveis podem ser listados por este endpoint.");
+		}
+		return animalService.listarDisponiveis();
 	}
 
 	@GetMapping("/{id}")

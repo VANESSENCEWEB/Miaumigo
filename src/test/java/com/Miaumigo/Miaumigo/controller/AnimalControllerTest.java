@@ -274,6 +274,54 @@ class AnimalControllerTest {
 	}
 
 	@Test
+	void deveListarAnimaisDisponiveis_quandoEndpointPublicoChamado() throws Exception {
+		UUID id = UUID.fromString("11111111-1111-1111-1111-111111111111");
+		when(animalService.listarDisponiveis())
+				.thenReturn(List.of(new AnimalResponse(
+						id,
+						"Luna",
+						2,
+						Porte.PEQUENO,
+						Especie.GATO,
+						"Dócil e tranquila",
+						AnimalStatus.DISPONIVEL,
+						List.of(Tag.DOCIL, Tag.CARINHOSO),
+						"animais/luna"
+				)));
+
+		mockMvc.perform(get("/api/v1/animais"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$").isArray())
+				.andExpect(jsonPath("$[0].id").value(id.toString()))
+				.andExpect(jsonPath("$[0].nome").value("Luna"))
+				.andExpect(jsonPath("$[0].status").value("DISPONIVEL"))
+				.andExpect(jsonPath("$[0].cloudinary_public_id").value("animais/luna"));
+
+		verify(animalService).listarDisponiveis();
+	}
+
+	@Test
+	void deveListarAnimaisDisponiveis_quandoStatusDisponivelInformado() throws Exception {
+		when(animalService.listarDisponiveis()).thenReturn(List.of());
+
+		mockMvc.perform(get("/api/v1/animais")
+						.param("status", "DISPONIVEL"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$").isArray());
+
+		verify(animalService).listarDisponiveis();
+	}
+
+	@Test
+	void deveRetornarBadRequest_quandoStatusNaoDisponivelForInformadoNaListagem() throws Exception {
+		mockMvc.perform(get("/api/v1/animais")
+						.param("status", "ADOTADO"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.mensagem")
+						.value("Somente animais disponíveis podem ser listados por este endpoint."));
+	}
+
+	@Test
 	void deveRetornarNotFound_quandoAnimalNaoEncontrado() throws Exception {
 		UUID id = UUID.fromString("11111111-1111-1111-1111-111111111111");
 		doThrow(new RecursoNaoEncontradoException("Animal não encontrado"))

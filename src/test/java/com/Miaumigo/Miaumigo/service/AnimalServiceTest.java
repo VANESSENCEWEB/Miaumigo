@@ -25,6 +25,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -115,6 +116,42 @@ class AnimalServiceTest {
 		assertEquals(Especie.GATO, response.especie());
 		assertEquals(List.of(Tag.DOCIL, Tag.CARINHOSO), response.tags());
 		assertEquals("animais/luna", response.cloudinaryPublicId());
+	}
+
+	@Test
+	void deveListarAnimaisDisponiveis_quandoExistiremAnimaisComStatusDisponivel() {
+		UUID id = UUID.randomUUID();
+		Animal animal = new Animal(
+				"Luna",
+				Especie.GATO,
+				Porte.PEQUENO,
+				2,
+				"Dócil",
+				UUID.randomUUID(),
+				List.of(Tag.DOCIL, Tag.CARINHOSO),
+				"animais/luna"
+		);
+		ReflectionTestUtils.setField(animal, "id", id);
+		when(animalRepository.findByStatus(AnimalStatus.DISPONIVEL)).thenReturn(List.of(animal));
+
+		List<AnimalResponse> response = animalService.listarDisponiveis();
+
+		assertEquals(1, response.size());
+		assertEquals(id, response.getFirst().id());
+		assertEquals("Luna", response.getFirst().nome());
+		assertEquals(AnimalStatus.DISPONIVEL, response.getFirst().status());
+		assertEquals("animais/luna", response.getFirst().cloudinaryPublicId());
+		verify(animalRepository).findByStatus(AnimalStatus.DISPONIVEL);
+	}
+
+	@Test
+	void deveRetornarListaVazia_quandoNaoExistiremAnimaisDisponiveis() {
+		when(animalRepository.findByStatus(AnimalStatus.DISPONIVEL)).thenReturn(List.of());
+
+		List<AnimalResponse> response = animalService.listarDisponiveis();
+
+		assertTrue(response.isEmpty());
+		verify(animalRepository).findByStatus(AnimalStatus.DISPONIVEL);
 	}
 
 	@Test

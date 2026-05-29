@@ -39,6 +39,7 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/v1/adotantes").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/v1/lares/cadastro").permitAll()
+						.requestMatchers(HttpMethod.GET, "/api/v1/animais").permitAll()
 						.requestMatchers(HttpMethod.GET, "/api/v1/animais/*").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/v1/lares").authenticated()
 						.requestMatchers(HttpMethod.POST, "/api/v1/lares/*/operadores").authenticated()
@@ -81,6 +82,8 @@ public class SecurityConfig {
 		configuration.setAllowedOrigins(List.of(
 				"http://localhost:8080",
 				"http://127.0.0.1:8080",
+				"http://localhost:5173",
+				"http://127.0.0.1:5173",
 				"http://localhost:5500",
 				"http://127.0.0.1:5500",
 				"https://miaumigo.onrender.com"

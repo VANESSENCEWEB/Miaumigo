@@ -18,6 +18,8 @@ const state = {
 	user: JSON.parse(localStorage.getItem("miaumigo_user") || "null")
 };
 
+const DEFAULT_API_BASE = "https://miaumigo.onrender.com";
+
 const elements = {
 	apiBase: document.querySelector("#apiBase"),
 	apiLog: document.querySelector("#apiLog"),
@@ -44,17 +46,25 @@ function initialApiBase() {
 		return queryApi;
 	}
 	const savedApi = localStorage.getItem("miaumigo_api");
-	if (savedApi && !isLocalFrontend()) {
+	if (savedApi && !isLocalApiBase(savedApi)) {
 		return savedApi;
 	}
 	if (isLocalFrontend()) {
-		return window.location.origin;
+		return DEFAULT_API_BASE;
 	}
-	return savedApi || elements.apiBase.value;
+	return savedApi || elements.apiBase.value || DEFAULT_API_BASE;
 }
 
 function isLocalFrontend() {
 	return ["localhost", "127.0.0.1"].includes(window.location.hostname);
+}
+
+function isLocalApiBase(apiBase) {
+	try {
+		return ["localhost", "127.0.0.1"].includes(new URL(apiBase).hostname);
+	} catch {
+		return false;
+	}
 }
 
 function bindNavigation() {
@@ -279,7 +289,7 @@ async function request(path, options) {
 				? "A API demorou mais de 25 segundos para responder. No Render, isso pode acontecer quando o serviço está acordando."
 				: null;
 		const corsHint = apiBase().includes("miaumigo.onrender.com") && isLocalFrontend()
-				? "Você está em localhost chamando a API do Render. Se o Render ainda não tiver a configuração CORS publicada, o navegador bloqueia a chamada. Para testar localmente agora, use http://localhost:8080 no campo API."
+				? "Você está em localhost chamando a API do Render. Se o Render ainda não tiver a configuração CORS publicada, o navegador bloqueia a chamada."
 				: null;
 		elements.apiLog.textContent = [
 			"Falha ao chamar a API.",

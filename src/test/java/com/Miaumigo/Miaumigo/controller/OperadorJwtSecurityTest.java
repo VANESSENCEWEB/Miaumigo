@@ -1,7 +1,12 @@
 package com.Miaumigo.Miaumigo.controller;
 
+import com.Miaumigo.Miaumigo.domain.AnimalStatus;
+import com.Miaumigo.Miaumigo.domain.Especie;
+import com.Miaumigo.Miaumigo.domain.Porte;
 import com.Miaumigo.Miaumigo.domain.SolicitacaoStatus;
 import com.Miaumigo.Miaumigo.domain.Role;
+import com.Miaumigo.Miaumigo.domain.Tag;
+import com.Miaumigo.Miaumigo.dto.AnimalResponse;
 import com.Miaumigo.Miaumigo.dto.CadastroLarComOperadorResponse;
 import com.Miaumigo.Miaumigo.dto.LarResponse;
 import com.Miaumigo.Miaumigo.dto.OperadorResponse;
@@ -219,6 +224,30 @@ class OperadorJwtSecurityTest {
 				.andExpect(status().isCreated());
 
 		verify(animalService).cadastrar(any(), org.mockito.ArgumentMatchers.eq(operadorId));
+	}
+
+	@Test
+	void deveListarAnimaisDisponiveisSemToken() throws Exception {
+		UUID animalId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+		when(animalService.listarDisponiveis())
+				.thenReturn(List.of(new AnimalResponse(
+						animalId,
+						"Luna",
+						2,
+						Porte.PEQUENO,
+						Especie.GATO,
+						"Docil e tranquila",
+						AnimalStatus.DISPONIVEL,
+						List.of(Tag.CALMO),
+						"animais/luna"
+				)));
+
+		mockMvc.perform(get("/api/v1/animais"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$[0].id").value(animalId.toString()))
+				.andExpect(jsonPath("$[0].status").value("DISPONIVEL"));
+
+		verify(animalService).listarDisponiveis();
 	}
 
 	@Test
