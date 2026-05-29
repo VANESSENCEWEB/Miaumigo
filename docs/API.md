@@ -46,6 +46,7 @@ Fazer login como adotante -> receber JWT -> usar Bearer token no fluxo do adotan
 | `POST` | `/api/v1/lares/{id}/operadores` | Bearer token de admin | Cadastra operador em um lar existente |
 | `GET` | `/api/v1/lares/me/solicitacoes?status=PENDENTE` | Bearer token de operador | Lista solicitacoes do lar |
 | `POST` | `/api/v1/animais` | Bearer token de operador | Cadastra animal no lar do operador |
+| `GET` | `/api/v1/animais?status=DISPONIVEL` | Publico | Lista animais disponiveis |
 | `GET` | `/api/v1/animais/{id}` | Publico | Exibe detalhe publico do animal |
 | `POST` | `/api/v1/animais/{id}/solicitacoes` | Bearer token de adotante | Cria solicitacao pendente |
 | `POST` | `/api/v1/animais/{id}/texto-divulgacao` | Bearer token de operador ou admin | Gera texto de divulgacao por IA |
@@ -174,6 +175,31 @@ Resposta `200`:
     "tags": ["CALMO", "CARINHOSO"],
     "cloudinary_public_id": "animais/luna",
     "compatibilidade": 2
+  }
+]
+```
+
+### Listar animais disponiveis
+
+```http
+GET /api/v1/animais
+GET /api/v1/animais?status=DISPONIVEL
+```
+
+Resposta `200`:
+
+```json
+[
+  {
+    "id": "11111111-1111-1111-1111-111111111111",
+    "nome": "Luna",
+    "idade": 2,
+    "porte": "PEQUENO",
+    "especie": "GATO",
+    "descricao": "Gata calma e carinhosa.",
+    "status": "DISPONIVEL",
+    "tags": ["CALMO", "CARINHOSO"],
+    "cloudinary_public_id": "animais/luna"
   }
 ]
 ```
