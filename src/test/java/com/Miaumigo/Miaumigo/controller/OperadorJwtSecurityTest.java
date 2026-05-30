@@ -3,6 +3,7 @@ package com.Miaumigo.Miaumigo.controller;
 import com.Miaumigo.Miaumigo.domain.AnimalStatus;
 import com.Miaumigo.Miaumigo.domain.Especie;
 import com.Miaumigo.Miaumigo.domain.Porte;
+import com.Miaumigo.Miaumigo.domain.SexoAnimal;
 import com.Miaumigo.Miaumigo.domain.SolicitacaoStatus;
 import com.Miaumigo.Miaumigo.domain.Role;
 import com.Miaumigo.Miaumigo.domain.Tag;
@@ -233,10 +234,11 @@ class OperadorJwtSecurityTest {
 				.thenReturn(List.of(new AnimalResponse(
 						animalId,
 						"Luna",
-						2,
-						Porte.PEQUENO,
-						Especie.GATO,
-						"Docil e tranquila",
+							2,
+							Porte.PEQUENO,
+							Especie.GATO,
+							SexoAnimal.FEMEA,
+							"Docil e tranquila",
 						AnimalStatus.DISPONIVEL,
 						List.of(Tag.CALMO),
 						"animais/luna"

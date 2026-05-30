@@ -29,6 +29,10 @@ public class Animal {
 	@Column(nullable = false)
 	private Porte porte;
 
+	@Enumerated(EnumType.STRING)
+	@Column(name = "sexo")
+	private SexoAnimal sexo;
+
 	private Integer idade;
 
 	@Column(length = 1000)
@@ -82,6 +86,10 @@ public class Animal {
 		this(nome, especie, porte, idade, descricao, larId, List.of(), null);
 	}
 
+	public Animal(String nome, Especie especie, Porte porte, SexoAnimal sexo, Integer idade, String descricao, UUID larId) {
+		this(nome, especie, porte, sexo, idade, descricao, larId, List.of(), null);
+	}
+
 	public Animal(
 			String nome,
 			Especie especie,
@@ -92,10 +100,25 @@ public class Animal {
 			List<Tag> tags,
 			String cloudinaryPublicId
 	) {
+		this(nome, especie, porte, null, idade, descricao, larId, tags, cloudinaryPublicId);
+	}
+
+	public Animal(
+			String nome,
+			Especie especie,
+			Porte porte,
+			SexoAnimal sexo,
+			Integer idade,
+			String descricao,
+			UUID larId,
+			List<Tag> tags,
+			String cloudinaryPublicId
+	) {
 		validarDados(nome, especie, porte, idade, larId);
 		this.nome = nome;
 		this.especie = especie;
 		this.porte = porte;
+		this.sexo = sexo;
 		this.idade = idade;
 		this.descricao = descricao;
 		this.larId = larId;
@@ -195,6 +218,10 @@ public class Animal {
 
 	public Porte getPorte() {
 		return porte;
+	}
+
+	public SexoAnimal getSexo() {
+		return sexo;
 	}
 
 	public Integer getIdade() {

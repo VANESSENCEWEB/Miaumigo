@@ -172,6 +172,7 @@ Resposta `200`:
     "idade": 2,
     "porte": "PEQUENO",
     "especie": "GATO",
+    "sexo": "FEMEA",
     "tags": ["CALMO", "CARINHOSO"],
     "cloudinary_public_id": "animais/luna",
     "compatibilidade": 2
@@ -196,6 +197,7 @@ Resposta `200`:
     "idade": 2,
     "porte": "PEQUENO",
     "especie": "GATO",
+    "sexo": "FEMEA",
     "descricao": "Gata calma e carinhosa.",
     "status": "DISPONIVEL",
     "tags": ["CALMO", "CARINHOSO"],
@@ -219,6 +221,7 @@ Resposta `200`:
   "idade": 2,
   "porte": "PEQUENO",
   "especie": "GATO",
+  "sexo": "FEMEA",
   "descricao": "Gata calma e carinhosa.",
   "status": "DISPONIVEL",
   "tags": ["CALMO", "CARINHOSO"],

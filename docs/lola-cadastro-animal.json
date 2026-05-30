@@ -1,0 +1,26 @@
+{
+  "origem": "frontend hardcoded removido",
+  "foto": {
+    "path_publico_original": "/gato2.jpeg",
+    "arquivo_no_repositorio": "frontend/public/gato2.jpeg"
+  },
+  "cadastro_animal_sugerido": {
+    "nome": "Lola",
+    "especie": "GATO",
+    "porte": "PEQUENO",
+    "sexo": "FEMEA",
+    "idade": 2,
+    "descricao": "Curiosa, ativa e muito carinhosa depois que ganha confianca. Resgatada com a ninhada em uma area residencial. Esta em lar temporario e se adapta rapido a novas pessoas.",
+    "tags": ["BRINCALHAO", "SOCIAL"],
+    "cloudinary_public_id": null
+  },
+  "observacoes_originais": {
+    "badge": "Novo",
+    "status": "Disponivel",
+    "historico_saude": [
+      "Vermifugado",
+      "Primeira vacina aplicada",
+      "Teste FIV/FeLV pendente"
+    ]
+  }
+}

@@ -1,17 +1,4 @@
-const fallbackImages = [
-	"/gato2.jpeg",
-	"/cachorrofemea1.png",
-	"/cachorro1.jpg",
-	"/cachorromacho1.png",
-	"/gatomacho1.png",
-	"/cachorro2.jpg",
-	"/cachorromacho2.jpg",
-	"/gato1.jpg",
-	"/gato3.jpg",
-	"/gatomacho2.png",
-	"/cachorrofemea2.jpg",
-	"/cachorromacho3.png",
-];
+const placeholderImage = "/miaumigos_icon.svg";
 
 const especieLabels = {
 	CACHORRO: "Cachorro",
@@ -29,6 +16,12 @@ const statusLabels = {
 	DISPONIVEL: "Disponível",
 	EM_PROCESSO: "Em processo",
 	ADOTADO: "Adotado",
+};
+
+const sexoLabels = {
+	MACHO: "Macho",
+	FEMEA: "Fêmea",
+	DESCONHECIDO: "Não informado",
 };
 
 const tagLabels = {
@@ -49,7 +42,7 @@ const tagLabels = {
 
 export const tagOptions = Object.entries(tagLabels).map(([value, label]) => ({ value, label }));
 
-export function mapAnimal(animal, index = 0) {
+export function mapAnimal(animal) {
 	const tags = animal.tags || [];
 	return {
 		...animal,
@@ -59,14 +52,11 @@ export function mapAnimal(animal, index = 0) {
 		breed: especieLabels[animal.especie] || animal.especie || "SRD",
 		size: porteLabels[animal.porte] || animal.porte || "Porte não informado",
 		age: formatAge(animal.idade),
-		sex: "Não informado",
-		city: "Pernambuco",
-		distance: "Disponível",
-		image: imageFrom(animal.cloudinary_public_id, index),
+		sex: sexoLabels[animal.sexo] || "Não informado",
+		image: imageFrom(animal.cloudinary_public_id),
 		badge: animal.compatibilidade !== undefined ? `${animal.compatibilidade} match` : statusLabels[animal.status] || "Disponível",
 		tags: tags.map((tag) => tagLabels[tag] || tag.toLowerCase()),
 		status: statusLabels[animal.status] || animal.status || "Disponível",
-		health: ["Informações de saúde serão confirmadas pelo lar responsável."],
 		history: animal.descricao || "Este pet está aguardando uma família responsável.",
 		personality: animal.descricao || "Conheça este pet e veja se ele combina com sua rotina.",
 		score: animal.compatibilidade === undefined ? null : animal.compatibilidade,
@@ -74,7 +64,7 @@ export function mapAnimal(animal, index = 0) {
 }
 
 export function mapAnimals(animais) {
-	return (animais || []).map((animal, index) => mapAnimal(animal, index));
+	return (animais || []).map((animal) => mapAnimal(animal));
 }
 
 function formatAge(age) {
@@ -87,9 +77,9 @@ function formatAge(age) {
 	return `${age} anos`;
 }
 
-function imageFrom(publicId, index) {
+function imageFrom(publicId) {
 	if (publicId?.startsWith("http://") || publicId?.startsWith("https://") || publicId?.startsWith("/")) {
 		return publicId;
 	}
-	return fallbackImages[index % fallbackImages.length];
+	return placeholderImage;
 }
