@@ -6,15 +6,12 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronRight,
-  Dog,
   HandHeart,
   Heart,
   Home as HomeIcon,
-  MapPin,
   Menu,
   MessageCircle,
   PawPrint,
-  Search,
   ShieldCheck,
   UserCircle,
   Users,
@@ -32,7 +29,7 @@ import SobrePets from "../SobrePets";
 import Solicitacoes from "../Solicitacoes";
 import { buscarAnimal, clearSession, listarAnimaisDisponiveis, loadSession, saveSession } from "../../lib/api";
 import { mapAnimal, mapAnimals } from "../../lib/pets";
-import { helpOptions, orgs, petCategories, pets as fallbackPets, stories } from "./data";
+import { helpOptions, orgs, petCategories, stories } from "./data";
 import { PetCard } from "./shared";
 
 const trustBadges = ["100% gratuito", "Adoção segura", "ONGs verificadas"];
@@ -60,7 +57,7 @@ export default function Home() {
         }
       } catch (error) {
         if (active) {
-          setCatalogPets(fallbackPets);
+          setCatalogPets([]);
           setApiError(error.message);
         }
       } finally {
@@ -80,13 +77,6 @@ export default function Home() {
     setActivePage(page);
     setMenuOpen(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const searchAndGo = (term) => {
-    setSearchTerm(term);
-    if (term.trim()) {
-      setActivePage("pets");
-    }
   };
 
   const handleSession = (nextSession) => {
@@ -139,9 +129,9 @@ export default function Home() {
 
       <main>
         {apiError && <div className="api-alert">Não foi possível sincronizar com a API: {apiError}</div>}
-        {activePage === "home" && <HomeLanding pets={catalogPets} loading={catalogLoading} onNavigate={navigate} onMatch={goToMatch} onSearch={searchAndGo} onSelectPet={openPetDetails} />}
+        {activePage === "home" && <HomeLanding pets={catalogPets} loading={catalogLoading} onNavigate={navigate} onMatch={goToMatch} onSelectPet={openPetDetails} />}
         {activePage === "pets" && <Encontrar pets={catalogPets} loading={catalogLoading} searchTerm={searchTerm} onSearch={setSearchTerm} onSelectPet={openPetDetails} />}
-        {activePage === "petDetails" && <SobrePets pet={selectedPet} onBack={() => navigate("pets")} onNavigate={navigate} onAdopt={startAdoption} onMatch={goToMatch} />}
+        {activePage === "petDetails" && <SobrePets pet={selectedPet} relatedPets={catalogPets.filter(isApiPet)} onBack={() => navigate("pets")} onNavigate={navigate} onAdopt={startAdoption} onMatch={goToMatch} onSelectPet={openPetDetails} />}
         {activePage === "how" && <Como onNavigate={navigate} />}
         {activePage === "orgs" && <Ongs />}
         {activePage === "stories" && <Historias />}
@@ -239,10 +229,10 @@ function Dropdown({ label, active, items, onMain }) {
   );
 }
 
-function HomeLanding({ pets, loading, onNavigate, onMatch, onSearch, onSelectPet }) {
+function HomeLanding({ pets, loading, onNavigate, onMatch, onSelectPet }) {
   return (
     <>
-      <Hero onNavigate={onNavigate} onMatch={onMatch} onSearch={onSearch} />
+      <Hero onMatch={onMatch} />
       <PetPreview pets={pets} loading={loading} onNavigate={onNavigate} onSelectPet={onSelectPet} />
       <HowItWorks />
       <StoriesBlock onNavigate={onNavigate} />
@@ -252,14 +242,7 @@ function HomeLanding({ pets, loading, onNavigate, onMatch, onSearch, onSelectPet
   );
 }
 
-function Hero({ onNavigate, onMatch, onSearch }) {
-  const [localValue, setLocalValue] = useState("");
-
-  const submit = (event) => {
-    event.preventDefault();
-    onSearch(localValue);
-  };
-
+function Hero({ onMatch }) {
   return (
     <section className="hero-section">
       <div className="home-container hero-grid">
@@ -268,39 +251,6 @@ function Hero({ onNavigate, onMatch, onSearch }) {
             Encontre seu <strong>novo melhor amigo.</strong>
           </h1>
           <p>Descubra pets compatíveis com sua rotina e transforme uma vida.</p>
-
-          <form className="hero-search" onSubmit={submit}>
-            <Search size={19} />
-            <input
-              value={localValue}
-              onChange={(event) => setLocalValue(event.target.value)}
-              placeholder="Buscar por cidade, raça ou personalidade..."
-              aria-label="Buscar pets"
-            />
-          </form>
-
-          <div className="hero-filter-controls">
-            <button onClick={() => onNavigate("pets")}>
-              <Dog size={16} />
-              Cachorro
-              <ChevronDown size={14} />
-            </button>
-            <button onClick={() => onNavigate("pets")}>
-              <MapPin size={16} />
-              Até 10km
-              <ChevronDown size={14} />
-            </button>
-            <button onClick={() => onNavigate("pets")}>
-              <PawPrint size={16} />
-              Porte
-              <ChevronDown size={14} />
-            </button>
-            <button onClick={() => onNavigate("pets")}>
-              <CalendarCheck size={16} />
-              Idade
-              <ChevronDown size={14} />
-            </button>
-          </div>
 
           <div className="hero-actions">
             <button className="primary-action" onClick={onMatch}>
@@ -328,8 +278,6 @@ function Hero({ onNavigate, onMatch, onSearch }) {
 }
 
 function PetPreview({ pets, loading, onNavigate, onSelectPet }) {
-  const previewPets = pets.length ? pets : fallbackPets;
-
   return (
     <section className="home-section">
       <div className="home-container">
@@ -344,7 +292,8 @@ function PetPreview({ pets, loading, onNavigate, onSelectPet }) {
         </div>
         <div className="pet-grid pet-grid-home">
           {loading && <p>Carregando pets disponíveis...</p>}
-          {!loading && previewPets.slice(0, 5).map((pet) => (
+          {!loading && pets.length === 0 && <p>Nenhum pet disponível encontrado.</p>}
+          {!loading && pets.slice(0, 5).map((pet) => (
             <PetCard key={pet.id} pet={pet} onSelect={() => onSelectPet(pet)} />
           ))}
         </div>
@@ -464,10 +413,6 @@ function OrgsBlock({ onNavigate }) {
                 {index % 3 === 2 && <Users size={32} />}
               </div>
               <h3>{org}</h3>
-              <span>
-                <MapPin size={14} />
-                Recife - PE
-              </span>
             </article>
           ))}
         </div>

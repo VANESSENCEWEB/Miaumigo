@@ -1,4 +1,4 @@
-import { Heart, MapPin } from "lucide-react";
+import { Heart } from "lucide-react";
 
 export function SectionHeading({ eyebrow, title, text }) {
   return (
@@ -29,10 +29,6 @@ export function PetCard({ pet, onSelect }) {
           <p>
             {pet.age} • {pet.size}
           </p>
-          <span className="pet-location">
-            <MapPin size={14} />
-            {pet.distance || pet.city} de você
-          </span>
           <div className="tags">
             {pet.tags.slice(0, 2).map((tag) => (
               <small key={tag}>{tag}</small>

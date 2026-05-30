@@ -3,6 +3,7 @@ package com.Miaumigo.Miaumigo.controller;
 import com.Miaumigo.Miaumigo.domain.Especie;
 import com.Miaumigo.Miaumigo.domain.AnimalStatus;
 import com.Miaumigo.Miaumigo.domain.Porte;
+import com.Miaumigo.Miaumigo.domain.SexoAnimal;
 import com.Miaumigo.Miaumigo.domain.Tag;
 import com.Miaumigo.Miaumigo.dto.AnimalResponse;
 import com.Miaumigo.Miaumigo.dto.SolicitacaoAdocaoResponse;
@@ -70,6 +71,7 @@ class AnimalControllerTest {
 					"nome": "Luna",
 					"especie": "GATO",
 					"porte": "PEQUENO",
+					"sexo": "FEMEA",
 					"idade": 2,
 					"descricao": "Dócil e tranquila",
 					"tags": ["DOCIL", "CARINHOSO"],
@@ -83,7 +85,7 @@ class AnimalControllerTest {
 				.andExpect(status().isCreated())
 				.andExpect(content().string(""));
 
-		verify(animalService).cadastrar(any(), any());
+			verify(animalService).cadastrar(argThat(cadastro -> cadastro.sexo() == SexoAnimal.FEMEA), any());
 	}
 
 	@Test
@@ -248,22 +250,24 @@ class AnimalControllerTest {
 				.thenReturn(new AnimalResponse(
 						id,
 						"Luna",
-						2,
+							2,
 							Porte.PEQUENO,
 							Especie.GATO,
+							SexoAnimal.FEMEA,
 							"Dócil e tranquila",
 							AnimalStatus.DISPONIVEL,
 							List.of(Tag.DOCIL, Tag.CARINHOSO),
-						"animais/luna"
-				));
+							"animais/luna"
+					));
 
 		mockMvc.perform(get("/api/v1/animais/{id}", id))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.id").value(id.toString()))
 				.andExpect(jsonPath("$.nome").value("Luna"))
 				.andExpect(jsonPath("$.idade").value(2))
-				.andExpect(jsonPath("$.porte").value("PEQUENO"))
+					.andExpect(jsonPath("$.porte").value("PEQUENO"))
 					.andExpect(jsonPath("$.especie").value("GATO"))
+					.andExpect(jsonPath("$.sexo").value("FEMEA"))
 					.andExpect(jsonPath("$.descricao").value("Dócil e tranquila"))
 					.andExpect(jsonPath("$.status").value("DISPONIVEL"))
 				.andExpect(jsonPath("$.tags[0]").value("DOCIL"))
@@ -281,9 +285,10 @@ class AnimalControllerTest {
 						id,
 						"Luna",
 						2,
-						Porte.PEQUENO,
-						Especie.GATO,
-						"Dócil e tranquila",
+							Porte.PEQUENO,
+							Especie.GATO,
+							SexoAnimal.FEMEA,
+							"Dócil e tranquila",
 						AnimalStatus.DISPONIVEL,
 						List.of(Tag.DOCIL, Tag.CARINHOSO),
 						"animais/luna"
@@ -293,8 +298,9 @@ class AnimalControllerTest {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$").isArray())
 				.andExpect(jsonPath("$[0].id").value(id.toString()))
-				.andExpect(jsonPath("$[0].nome").value("Luna"))
-				.andExpect(jsonPath("$[0].status").value("DISPONIVEL"))
+					.andExpect(jsonPath("$[0].nome").value("Luna"))
+					.andExpect(jsonPath("$[0].sexo").value("FEMEA"))
+					.andExpect(jsonPath("$[0].status").value("DISPONIVEL"))
 				.andExpect(jsonPath("$[0].cloudinary_public_id").value("animais/luna"));
 
 		verify(animalService).listarDisponiveis();

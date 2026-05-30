@@ -5,6 +5,7 @@ import com.Miaumigo.Miaumigo.domain.Animal;
 import com.Miaumigo.Miaumigo.domain.AnimalStatus;
 import com.Miaumigo.Miaumigo.domain.Especie;
 import com.Miaumigo.Miaumigo.domain.Porte;
+import com.Miaumigo.Miaumigo.domain.SexoAnimal;
 import com.Miaumigo.Miaumigo.domain.Tag;
 import com.Miaumigo.Miaumigo.domain.Lar;
 import com.Miaumigo.Miaumigo.domain.Operador;
@@ -47,10 +48,11 @@ class AnimalServiceTest {
 		Operador operador = new Operador("Responsavel", "Rua A", "operador@email.com", "senha", "12345678901", lar);
 		CadastroAnimalRequest request = new CadastroAnimalRequest(
 				"Luna",
-				Especie.GATO,
-				Porte.PEQUENO,
-				2,
-				"Dócil e tranquila",
+					Especie.GATO,
+					Porte.PEQUENO,
+					SexoAnimal.FEMEA,
+					2,
+					"Dócil e tranquila",
 				List.of(Tag.DOCIL, Tag.CARINHOSO),
 				"animais/luna"
 		);
@@ -63,9 +65,10 @@ class AnimalServiceTest {
 		verify(animalRepository).save(animalCaptor.capture());
 		Animal animalSalvo = animalCaptor.getValue();
 		assertEquals("Luna", animalSalvo.getNome());
-		assertEquals(Especie.GATO, animalSalvo.getEspecie());
-		assertEquals(Porte.PEQUENO, animalSalvo.getPorte());
-		assertEquals(2, animalSalvo.getIdade());
+			assertEquals(Especie.GATO, animalSalvo.getEspecie());
+			assertEquals(Porte.PEQUENO, animalSalvo.getPorte());
+			assertEquals(SexoAnimal.FEMEA, animalSalvo.getSexo());
+			assertEquals(2, animalSalvo.getIdade());
 		assertEquals("Dócil e tranquila", animalSalvo.getDescricao());
 		assertEquals(List.of(Tag.DOCIL, Tag.CARINHOSO), animalSalvo.getTags());
 		assertEquals("animais/luna", animalSalvo.getCloudinaryPublicId());
@@ -96,9 +99,10 @@ class AnimalServiceTest {
 		UUID id = UUID.randomUUID();
 		Animal animal = new Animal(
 				"Luna",
-				Especie.GATO,
-				Porte.PEQUENO,
-				2,
+					Especie.GATO,
+					Porte.PEQUENO,
+					SexoAnimal.FEMEA,
+					2,
 				"Dócil",
 				UUID.randomUUID(),
 				List.of(Tag.DOCIL, Tag.CARINHOSO),
@@ -111,10 +115,11 @@ class AnimalServiceTest {
 
 		assertEquals(animal.getId(), response.id());
 		assertEquals("Luna", response.nome());
-		assertEquals(2, response.idade());
-		assertEquals(Porte.PEQUENO, response.porte());
-		assertEquals(Especie.GATO, response.especie());
-		assertEquals(List.of(Tag.DOCIL, Tag.CARINHOSO), response.tags());
+			assertEquals(2, response.idade());
+			assertEquals(Porte.PEQUENO, response.porte());
+			assertEquals(Especie.GATO, response.especie());
+			assertEquals(SexoAnimal.FEMEA, response.sexo());
+			assertEquals(List.of(Tag.DOCIL, Tag.CARINHOSO), response.tags());
 		assertEquals("animais/luna", response.cloudinaryPublicId());
 	}
 
@@ -123,9 +128,10 @@ class AnimalServiceTest {
 		UUID id = UUID.randomUUID();
 		Animal animal = new Animal(
 				"Luna",
-				Especie.GATO,
-				Porte.PEQUENO,
-				2,
+					Especie.GATO,
+					Porte.PEQUENO,
+					SexoAnimal.FEMEA,
+					2,
 				"Dócil",
 				UUID.randomUUID(),
 				List.of(Tag.DOCIL, Tag.CARINHOSO),
@@ -137,9 +143,10 @@ class AnimalServiceTest {
 		List<AnimalResponse> response = animalService.listarDisponiveis();
 
 		assertEquals(1, response.size());
-		assertEquals(id, response.getFirst().id());
-		assertEquals("Luna", response.getFirst().nome());
-		assertEquals(AnimalStatus.DISPONIVEL, response.getFirst().status());
+			assertEquals(id, response.getFirst().id());
+			assertEquals("Luna", response.getFirst().nome());
+			assertEquals(SexoAnimal.FEMEA, response.getFirst().sexo());
+			assertEquals(AnimalStatus.DISPONIVEL, response.getFirst().status());
 		assertEquals("animais/luna", response.getFirst().cloudinaryPublicId());
 		verify(animalRepository).findByStatus(AnimalStatus.DISPONIVEL);
 	}

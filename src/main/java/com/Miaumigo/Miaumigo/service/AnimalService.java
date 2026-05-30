@@ -40,11 +40,12 @@ public class AnimalService {
 				.orElseThrow(() -> new IdentidadeNaoAutenticadaException("Operador não autenticado."));
 		Animal animal = new Animal(
 				request.nome(),
-				request.especie(),
-				request.porte(),
-				request.idade(),
-				request.descricao(),
-				operador.getLar().getId(),
+					request.especie(),
+					request.porte(),
+					request.sexo(),
+					request.idade(),
+					request.descricao(),
+					operador.getLar().getId(),
 				request.tags(),
 				request.cloudinaryPublicId()
 		);
@@ -83,11 +84,12 @@ public class AnimalService {
 		return new AnimalResponse(
 				animal.getId(),
 				animal.getNome(),
-				animal.getIdade(),
-				animal.getPorte(),
-				animal.getEspecie(),
-				animal.getDescricao(),
-				animal.getStatus(),
+					animal.getIdade(),
+					animal.getPorte(),
+					animal.getEspecie(),
+					animal.getSexo(),
+					animal.getDescricao(),
+					animal.getStatus(),
 				animal.getTags(),
 				animal.getCloudinaryPublicId()
 		);

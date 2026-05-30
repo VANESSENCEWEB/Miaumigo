@@ -2,6 +2,7 @@ package com.Miaumigo.Miaumigo.dto;
 
 import com.Miaumigo.Miaumigo.domain.Especie;
 import com.Miaumigo.Miaumigo.domain.Porte;
+import com.Miaumigo.Miaumigo.domain.SexoAnimal;
 import com.Miaumigo.Miaumigo.domain.Tag;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
@@ -19,6 +20,8 @@ public record CadastroAnimalRequest(
 
 		@NotNull(message = "Porte do animal é obrigatório")
 		Porte porte,
+
+		SexoAnimal sexo,
 
 		@PositiveOrZero(message = "Idade do animal não pode ser negativa")
 		Integer idade,
