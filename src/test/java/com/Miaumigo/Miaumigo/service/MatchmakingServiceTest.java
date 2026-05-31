@@ -14,6 +14,7 @@ import com.Miaumigo.Miaumigo.exception.IdentidadeNaoAutenticadaException;
 import com.Miaumigo.Miaumigo.repository.AdotanteRepository;
 import com.Miaumigo.Miaumigo.repository.AnimalRepository;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -62,6 +63,21 @@ class MatchmakingServiceTest {
 		List<AnimalRecomendadoResponse> recomendacoes = matchmakingService.recomendarAnimais(adotanteId);
 
 		assertEquals(List.of("Primeiro", "Segundo"), recomendacoes.stream().map(AnimalRecomendadoResponse::nome).toList());
+	}
+
+	@Test
+	void deveRemoverAnimaisDuplicados_quandoRepositorioRetornarMesmoIdMaisDeUmaVez() {
+		UUID adotanteId = UUID.randomUUID();
+		Animal luna = novoAnimal("Luna", List.of(Tag.CALMO));
+		ReflectionTestUtils.setField(luna, "id", UUID.fromString("11111111-1111-1111-1111-111111111111"));
+		when(adotanteRepository.findById(adotanteId)).thenReturn(Optional.of(novoAdotante(List.of(Tag.CALMO))));
+		when(animalRepository.findByStatus(AnimalStatus.DISPONIVEL))
+				.thenReturn(List.of(luna, luna));
+
+		List<AnimalRecomendadoResponse> recomendacoes = matchmakingService.recomendarAnimais(adotanteId);
+
+		assertEquals(1, recomendacoes.size());
+		assertEquals("Luna", recomendacoes.getFirst().nome());
 	}
 
 	@Test

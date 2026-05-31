@@ -17,7 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -35,7 +37,7 @@ public class MatchmakingService {
 	public List<AnimalRecomendadoResponse> recomendarAnimais(UUID adotanteId) {
 		Adotante adotante = adotanteRepository.findById(adotanteId)
 				.orElseThrow(() -> new IdentidadeNaoAutenticadaException("Adotante não autenticado."));
-		List<Animal> animaisDisponiveis = animalRepository.findByStatus(AnimalStatus.DISPONIVEL);
+		List<Animal> animaisDisponiveis = removerDuplicados(animalRepository.findByStatus(AnimalStatus.DISPONIVEL));
 		List<AnimalRecomendadoResponse> recomendacoes = new ArrayList<>();
 
 		for (Animal animal : animaisDisponiveis) {
@@ -45,6 +47,17 @@ public class MatchmakingService {
 
 		recomendacoes.sort(Comparator.comparingInt(AnimalRecomendadoResponse::compatibilidade).reversed());
 		return recomendacoes;
+	}
+
+	private List<Animal> removerDuplicados(List<Animal> animais) {
+		Set<UUID> idsEncontrados = new LinkedHashSet<>();
+		List<Animal> animaisUnicos = new ArrayList<>();
+		for (Animal animal : animais) {
+			if (animal.getId() == null || idsEncontrados.add(animal.getId())) {
+				animaisUnicos.add(animal);
+			}
+		}
+		return animaisUnicos;
 	}
 
 	private int calcularCompatibilidade(Adotante adotante, Animal animal) {
