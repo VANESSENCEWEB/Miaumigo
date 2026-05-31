@@ -35,7 +35,7 @@ const animalImagesByName = {
 	LOLA: "/gatomacho1.png",
 	LUNA: "/gato1.jpg",
 	MEL: "/gato2.jpeg",
-	MILO: "/gatomacho1.png",
+	MILO: "/gatomacho2.png",
 	REX: "/cachorromacho1.png",
 	THOR: "/cachorromacho2.jpg",
 };
@@ -113,11 +113,7 @@ export function mapAnimals(animais) {
 			animaisUnicos.push(animal);
 		}
 	}
-	const imagensUsadas = {
-		CACHORRO: new Set(),
-		GATO: new Set(),
-		OUTRO: new Set(),
-	};
+	const imagensUsadas = new Set();
 	return animaisUnicos.map((animal) => mapAnimal(animal, uniqueAnimalImage(animal, imagensUsadas)));
 }
 
@@ -155,21 +151,21 @@ function localAnimalImage(animal) {
 
 function uniqueAnimalImage(animal, imagensUsadas) {
 	const hardcodedImage = hardcodedAnimalImage(animal);
-	if (hardcodedImage) {
+	if (hardcodedImage && !imagensUsadas.has(hardcodedImage)) {
+		imagensUsadas.add(hardcodedImage);
 		return hardcodedImage;
 	}
-	const especie = animal.especie || "OUTRO";
 	const images = imagesFor(animal);
-	const used = imagensUsadas[especie] || imagensUsadas.OUTRO;
-	const startIndex = hashAnimal(animal) % images.length;
+	const hardcodedIndex = hardcodedImage ? images.indexOf(hardcodedImage) : -1;
+	const startIndex = hardcodedIndex >= 0 ? (hardcodedIndex + 1) % images.length : hashAnimal(animal) % images.length;
 	for (let offset = 0; offset < images.length; offset += 1) {
 		const image = images[(startIndex + offset) % images.length];
-		if (!used.has(image)) {
-			used.add(image);
+		if (!imagensUsadas.has(image)) {
+			imagensUsadas.add(image);
 			return image;
 		}
 	}
-	return images[startIndex];
+	return hardcodedImage || images[startIndex];
 }
 
 function imagesFor(animal) {
