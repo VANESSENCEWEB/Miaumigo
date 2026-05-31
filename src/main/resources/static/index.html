@@ -1,160 +1,17 @@
 <!doctype html>
-<html lang="pt-BR">
-<head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Miaumigo - Fluxo do adotante</title>
-	<link rel="stylesheet" href="./styles.css">
-</head>
-<body>
-	<header class="topbar">
-		<div>
-			<p class="eyebrow">Miaumigo MVP</p>
-			<h1>Fluxo do adotante</h1>
-		</div>
-		<div class="api-box">
-			<label for="apiBase">API</label>
-			<input id="apiBase" type="url" value="https://miaumigo.onrender.com" autocomplete="off">
-		</div>
-	</header>
-
-	<main class="layout">
-		<aside class="sidebar" aria-label="Etapas do fluxo">
-			<button class="step is-active" data-panel="cadastro">
-				<span>1</span>
-				Cadastro
-			</button>
-			<button class="step" data-panel="login">
-				<span>2</span>
-				Login
-			</button>
-			<button class="step" data-panel="recomendacoes">
-				<span>3</span>
-				Recomendações
-			</button>
-			<button class="step" data-panel="solicitacoes">
-				<span>4</span>
-				Status
-			</button>
-		</aside>
-
-		<section class="workspace">
-			<div class="session">
-				<div>
-					<span class="label">Sessão</span>
-					<strong id="sessionName">Sem login</strong>
-				</div>
-				<div>
-					<span class="label">Papel</span>
-					<strong id="sessionRole">-</strong>
-				</div>
-				<button id="logoutButton" class="ghost" type="button">Sair</button>
-			</div>
-
-			<section id="cadastro" class="panel is-active">
-				<div class="panel-header">
-					<div>
-						<p class="eyebrow">Primeiro acesso</p>
-						<h2>Cadastrar adotante</h2>
-					</div>
-					<img class="panel-image" alt="" src="https://images.unsplash.com/photo-1601758174114-e711c0cbaa69?auto=format&fit=crop&w=360&q=80">
-				</div>
-
-				<form id="cadastroForm" class="form-grid">
-					<label>
-						Nome
-						<input name="nome" required value="Maria Silva">
-					</label>
-					<label>
-						Email
-						<input name="email" required type="email" value="maria@email.com">
-					</label>
-					<label>
-						Senha
-						<input name="senha" required type="password" value="senha123">
-					</label>
-					<label>
-						CPF
-						<input name="cpf" required value="12345678901">
-					</label>
-					<label class="span-2">
-						Endereço
-						<input name="endereco" required value="Rua das Flores, 123">
-					</label>
-					<fieldset class="span-2 choices">
-						<legend>Preferências</legend>
-						<div id="preferenciasCadastro"></div>
-					</fieldset>
-					<div class="actions span-2">
-						<button type="submit">Cadastrar adotante</button>
-					</div>
-				</form>
-			</section>
-
-			<section id="login" class="panel">
-				<div class="panel-header">
-					<div>
-						<p class="eyebrow">Autenticação</p>
-						<h2>Entrar como adotante</h2>
-					</div>
-					<img class="panel-image" alt="" src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=360&q=80">
-				</div>
-
-				<form id="loginForm" class="form-grid compact">
-					<label>
-						Email
-						<input name="email" required type="email" value="maria@email.com">
-					</label>
-					<label>
-						Senha
-						<input name="senha" required type="password" value="senha123">
-					</label>
-					<div class="actions span-2">
-						<button type="submit">Entrar</button>
-					</div>
-				</form>
-			</section>
-
-			<section id="recomendacoes" class="panel">
-				<div class="panel-title-row">
-					<div>
-						<p class="eyebrow">Matchmaking</p>
-						<h2>Animais recomendados</h2>
-					</div>
-					<button id="loadRecommendations" type="button">Buscar recomendações</button>
-				</div>
-				<div id="recommendationsList" class="cards empty-state">
-					Use um token de adotante para carregar os animais disponíveis.
-				</div>
-			</section>
-
-			<section id="solicitacoes" class="panel">
-				<div class="panel-title-row">
-					<div>
-						<p class="eyebrow">Acompanhamento</p>
-						<h2>Minhas solicitações</h2>
-					</div>
-					<button id="loadRequests" type="button">Atualizar status</button>
-				</div>
-				<div id="requestsList" class="table-wrap empty-state">
-					Nenhuma solicitação carregada.
-				</div>
-			</section>
-		</section>
-
-		<aside class="log-panel">
-			<div class="panel-title-row">
-				<div>
-					<p class="eyebrow">Debug</p>
-					<h2>Resposta da API</h2>
-				</div>
-				<button id="clearLog" class="ghost" type="button">Limpar</button>
-			</div>
-			<pre id="apiLog">Pronto para testar.</pre>
-		</aside>
-	</main>
-
-	<div id="toast" class="toast" role="status" aria-live="polite"></div>
-	<script src="./app.js"></script>
-</body>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/miaumigos_icon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <title>MiAumigos - Adoção Responsável</title>
+    <script type="module" crossorigin src="/assets/index-DDBzgXKA.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-0SkFVGz3.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
 </html>
