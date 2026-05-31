@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
@@ -50,14 +51,30 @@ public class MatchmakingService {
 	}
 
 	private List<Animal> removerDuplicados(List<Animal> animais) {
-		Set<UUID> idsEncontrados = new LinkedHashSet<>();
+		Set<String> chavesEncontradas = new LinkedHashSet<>();
 		List<Animal> animaisUnicos = new ArrayList<>();
 		for (Animal animal : animais) {
-			if (animal.getId() == null || idsEncontrados.add(animal.getId())) {
+			if (chavesEncontradas.add(chaveAnimal(animal))) {
 				animaisUnicos.add(animal);
 			}
 		}
 		return animaisUnicos;
+	}
+
+	private String chaveAnimal(Animal animal) {
+		if (animal.getCloudinaryPublicId() != null) {
+			return "imagem:" + animal.getCloudinaryPublicId().trim().toLowerCase(Locale.ROOT);
+		}
+		return "%s|%s|%s|%s".formatted(
+				normalizarChave(animal.getNome()),
+				animal.getEspecie(),
+				animal.getPorte(),
+				animal.getIdade()
+		);
+	}
+
+	private String normalizarChave(String valor) {
+		return valor == null ? "" : valor.trim().toLowerCase(Locale.ROOT);
 	}
 
 	private int calcularCompatibilidade(Adotante adotante, Animal animal) {

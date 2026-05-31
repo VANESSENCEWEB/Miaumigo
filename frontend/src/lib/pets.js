@@ -64,7 +64,16 @@ export function mapAnimal(animal) {
 }
 
 export function mapAnimals(animais) {
-	return (animais || []).map((animal) => mapAnimal(animal));
+	const animaisUnicos = [];
+	const chavesEncontradas = new Set();
+	for (const animal of animais || []) {
+		const chave = animalKey(animal);
+		if (!chavesEncontradas.has(chave)) {
+			chavesEncontradas.add(chave);
+			animaisUnicos.push(animal);
+		}
+	}
+	return animaisUnicos.map((animal) => mapAnimal(animal));
 }
 
 function formatAge(age) {
@@ -82,4 +91,17 @@ function imageFrom(publicId) {
 		return publicId;
 	}
 	return placeholderImage;
+}
+
+function animalKey(animal) {
+	if (animal.cloudinary_public_id) {
+		return `imagem:${String(animal.cloudinary_public_id).trim().toLowerCase()}`;
+	}
+	return [
+		animal.nome,
+		animal.especie,
+		animal.porte,
+		animal.idade,
+		animal.descricao,
+	].map((value) => String(value ?? "").trim().toLowerCase()).join("|");
 }

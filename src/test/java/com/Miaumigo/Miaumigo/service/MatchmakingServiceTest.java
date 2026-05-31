@@ -81,6 +81,23 @@ class MatchmakingServiceTest {
 	}
 
 	@Test
+	void deveRemoverAnimaisDuplicados_quandoMesmoAnimalEstiverCadastradoComIdsDiferentes() {
+		UUID adotanteId = UUID.randomUUID();
+		Animal lunaOriginal = novoAnimal("Luna", List.of(Tag.CALMO));
+		Animal lunaDuplicada = novoAnimal(" Luna ", List.of(Tag.CALMO));
+		ReflectionTestUtils.setField(lunaOriginal, "id", UUID.fromString("11111111-1111-1111-1111-111111111111"));
+		ReflectionTestUtils.setField(lunaDuplicada, "id", UUID.fromString("22222222-2222-2222-2222-222222222222"));
+		when(adotanteRepository.findById(adotanteId)).thenReturn(Optional.of(novoAdotante(List.of(Tag.CALMO))));
+		when(animalRepository.findByStatus(AnimalStatus.DISPONIVEL))
+				.thenReturn(List.of(lunaOriginal, lunaDuplicada));
+
+		List<AnimalRecomendadoResponse> recomendacoes = matchmakingService.recomendarAnimais(adotanteId);
+
+		assertEquals(1, recomendacoes.size());
+		assertEquals("Luna", recomendacoes.getFirst().nome());
+	}
+
+	@Test
 	void deveRetornarAnimaisComCompatibilidadeGenerica_quandoAdotanteSemPerfilCompleto() {
 		UUID adotanteId = UUID.randomUUID();
 		when(adotanteRepository.findById(adotanteId)).thenReturn(Optional.of(novoAdotante(List.of())));
