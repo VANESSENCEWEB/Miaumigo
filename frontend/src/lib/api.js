@@ -1,4 +1,7 @@
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "https://miaumigo.onrender.com").replace(/\/$/, "");
+const REQUEST_TIMEOUT_MS = 25000;
+const COLD_START_CODE = "COLD_START_TIMEOUT";
+export const COLD_START_MESSAGE = "Carregando aplicação. A primeira resposta pode demorar enquanto o servidor inicia.";
 
 const SESSION_KEY = "miaumigo_session";
 
@@ -51,6 +54,20 @@ export async function listarRecomendacoes(token) {
 	});
 }
 
+export async function buscarMeuPerfil(token) {
+	return request("/api/v1/adotantes/me", {
+		token,
+	});
+}
+
+export async function atualizarPerfilAdotante(payload, token) {
+	return request("/api/v1/adotantes/me/perfil", {
+		method: "PATCH",
+		body: payload,
+		token,
+	});
+}
+
 export async function solicitarAdocao(animalId, token) {
 	return request(`/api/v1/animais/${animalId}/solicitacoes`, {
 		method: "POST",
@@ -73,7 +90,7 @@ export async function cancelarSolicitacao(id, token) {
 
 async function request(path, options = {}) {
 	const controller = new AbortController();
-	const timeoutId = window.setTimeout(() => controller.abort(), 25000);
+	const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 	const headers = {
 		Accept: "application/json",
 		...options.headers,
@@ -101,7 +118,7 @@ async function request(path, options = {}) {
 		return data;
 	} catch (error) {
 		if (error.name === "AbortError") {
-			throw new ApiError("A API demorou mais de 25 segundos para responder.", 0, null);
+			throw new ApiError(COLD_START_MESSAGE, 0, null, COLD_START_CODE);
 		}
 		if (error instanceof TypeError) {
 			throw new ApiError("Não foi possível conectar à API. Verifique se o backend está no ar e se o CORS permite este frontend.", 0, null);
@@ -110,6 +127,10 @@ async function request(path, options = {}) {
 	} finally {
 		window.clearTimeout(timeoutId);
 	}
+}
+
+export function isColdStartError(error) {
+	return error instanceof ApiError && error.code === COLD_START_CODE;
 }
 
 function parseJson(text) {
@@ -128,10 +149,11 @@ function errorMessage(data, status) {
 }
 
 export class ApiError extends Error {
-	constructor(message, status, data) {
+	constructor(message, status, data, code = null) {
 		super(message);
 		this.name = "ApiError";
 		this.status = status;
 		this.data = data;
+		this.code = code;
 	}
 }

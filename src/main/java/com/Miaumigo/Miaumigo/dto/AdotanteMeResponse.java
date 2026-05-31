@@ -7,26 +7,16 @@ import com.Miaumigo.Miaumigo.domain.Tag;
 import com.Miaumigo.Miaumigo.domain.TempoDisponivel;
 import com.Miaumigo.Miaumigo.domain.TipoMoradia;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.NotBlank;
 
 import java.util.List;
+import java.util.UUID;
 
-public record CadastroAdotanteRequest(
-		@NotBlank(message = "Nome do adotante é obrigatório")
+public record AdotanteMeResponse(
+		UUID id,
 		String nome,
-
-		@NotBlank(message = "Endereço do adotante é obrigatório")
 		String endereco,
-
-		@NotBlank(message = "Email do adotante é obrigatório")
 		String email,
-
-		@NotBlank(message = "Senha do adotante é obrigatória")
-		String senha,
-
-		@NotBlank(message = "CPF do adotante é obrigatório")
 		String cpf,
-
 		List<Tag> preferencias,
 
 		@JsonProperty("especies_preferidas")
@@ -54,7 +44,9 @@ public record CadastroAdotanteRequest(
 		Boolean possuiGatos,
 
 		String telefone,
+		String cidade,
 
-		String cidade
+		@JsonProperty("perfil_completo")
+		boolean perfilCompleto
 ) {
 }

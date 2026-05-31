@@ -1,6 +1,12 @@
 package com.Miaumigo.Miaumigo.controller;
 
+import com.Miaumigo.Miaumigo.domain.Especie;
+import com.Miaumigo.Miaumigo.domain.ExperienciaAnimais;
+import com.Miaumigo.Miaumigo.domain.Porte;
 import com.Miaumigo.Miaumigo.domain.Tag;
+import com.Miaumigo.Miaumigo.domain.TempoDisponivel;
+import com.Miaumigo.Miaumigo.domain.TipoMoradia;
+import com.Miaumigo.Miaumigo.dto.AdotanteMeResponse;
 import com.Miaumigo.Miaumigo.dto.AdotanteResponse;
 import com.Miaumigo.Miaumigo.dto.AnimalRecomendadoResponse;
 import com.Miaumigo.Miaumigo.exception.CpfJaCadastradoException;
@@ -26,6 +32,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -130,19 +137,53 @@ class AdotanteControllerTest {
 		when(usuarioAutenticadoService.exigirAdotante(any())).thenReturn(adotanteId);
 		when(matchmakingService.recomendarAnimais(adotanteId))
 				.thenReturn(List.of(
-						new AnimalRecomendadoResponse(lunaId, "Luna", 2, null, null, List.of(Tag.CALMO, Tag.CONVIVE_COM_GATOS), "animais/luna", 2),
-						new AnimalRecomendadoResponse(thorId, "Thor", 3, null, null, List.of(Tag.ENERGICO), "animais/thor", 0)
+						new AnimalRecomendadoResponse(lunaId, "Luna", 2, null, null, List.of(Tag.CALMO, Tag.CONVIVE_COM_GATOS), "animais/luna", 92),
+						new AnimalRecomendadoResponse(thorId, "Thor", 3, null, null, List.of(Tag.ENERGICO), "animais/thor", 34)
 				));
 
 		mockMvc.perform(get("/api/v1/adotantes/me/animais-recomendados")
 						.header("Authorization", "Bearer token"))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$[0].nome").value("Luna"))
-				.andExpect(jsonPath("$[0].compatibilidade").value(2))
+				.andExpect(jsonPath("$[0].compatibilidade").value(92))
 				.andExpect(jsonPath("$[1].nome").value("Thor"))
-				.andExpect(jsonPath("$[1].compatibilidade").value(0));
+				.andExpect(jsonPath("$[1].compatibilidade").value(34));
 
 		verify(matchmakingService).recomendarAnimais(adotanteId);
+	}
+
+	@Test
+	void deveRetornarMeuPerfil_quandoAutenticado() throws Exception {
+		UUID adotanteId = UUID.fromString("22222222-2222-2222-2222-222222222222");
+		when(usuarioAutenticadoService.exigirAdotante(any())).thenReturn(adotanteId);
+		when(adotanteService.buscarMeuPerfil(adotanteId)).thenReturn(meuPerfilResponse(adotanteId));
+
+		mockMvc.perform(get("/api/v1/adotantes/me")
+						.header("Authorization", "Bearer token"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.id").value(adotanteId.toString()))
+				.andExpect(jsonPath("$.especies_preferidas[0]").value("GATO"))
+				.andExpect(jsonPath("$.tipo_moradia").value("APARTAMENTO"))
+				.andExpect(jsonPath("$.perfil_completo").value(true));
+
+		verify(adotanteService).buscarMeuPerfil(adotanteId);
+	}
+
+	@Test
+	void deveAtualizarPerfil_quandoAutenticado() throws Exception {
+		UUID adotanteId = UUID.fromString("22222222-2222-2222-2222-222222222222");
+		when(usuarioAutenticadoService.exigirAdotante(any())).thenReturn(adotanteId);
+		when(adotanteService.atualizarPerfil(any(), any())).thenReturn(meuPerfilResponse(adotanteId));
+
+		mockMvc.perform(patch("/api/v1/adotantes/me/perfil")
+						.header("Authorization", "Bearer token")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(perfilRequest()))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.perfil_completo").value(true))
+				.andExpect(jsonPath("$.preferencias[0]").value("CALMO"));
+
+		verify(adotanteService).atualizarPerfil(any(), any());
 	}
 
 	@Test
@@ -167,6 +208,46 @@ class AdotanteControllerTest {
 					"senha": "senha123",
 					"cpf": "12345678901",
 					"preferencias": ["CALMO", "CONVIVE_COM_GATOS"]
+				}
+				""";
+	}
+
+	private AdotanteMeResponse meuPerfilResponse(UUID id) {
+		return new AdotanteMeResponse(
+				id,
+				"Maria Silva",
+				"Rua das Flores, 123",
+				"maria@email.com",
+				"12345678901",
+				List.of(Tag.CALMO),
+				List.of(Especie.GATO),
+				TipoMoradia.APARTAMENTO,
+				Porte.PEQUENO,
+				TempoDisponivel.UMA_HORA,
+				ExperienciaAnimais.JA_TIVE_PETS,
+				false,
+				false,
+				true,
+				"81999999999",
+				"Recife",
+				true
+		);
+	}
+
+	private String perfilRequest() {
+		return """
+				{
+					"especies_preferidas": ["GATO"],
+					"preferencias": ["CALMO"],
+					"tipo_moradia": "APARTAMENTO",
+					"espaco_disponivel": "PEQUENO",
+					"tempo_disponivel": "UMA_HORA",
+					"experiencia_animais": "JA_TIVE_PETS",
+					"possui_criancas": false,
+					"possui_caes": false,
+					"possui_gatos": true,
+					"telefone": "81999999999",
+					"cidade": "Recife"
 				}
 				""";
 	}

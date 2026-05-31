@@ -1188,6 +1188,50 @@ button {
   text-transform: uppercase;
 }
 
+.match-score strong {
+  font-size: 24px;
+}
+
+.match-toggle-field {
+  display: flex !important;
+  grid-template-columns: none !important;
+  align-items: center;
+  gap: 10px !important;
+  min-height: 46px;
+  padding: 0 14px;
+  background: #f8fbff;
+  border: 1px solid #d7e8f8;
+  border-radius: 14px;
+}
+
+.match-toggle-field input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--blue);
+}
+
+.adoption-profile-summary {
+  display: grid;
+  gap: 6px;
+  padding: 16px;
+  background: #f3f9ff;
+  border: 1px solid #d7e8f8;
+  border-radius: 16px;
+}
+
+.adoption-profile-summary span {
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.adoption-profile-summary p {
+  margin: 0;
+  color: #293444;
+  font-weight: 800;
+}
+
 .match-callout {
   display: grid;
   grid-template-columns: auto 1fr auto;

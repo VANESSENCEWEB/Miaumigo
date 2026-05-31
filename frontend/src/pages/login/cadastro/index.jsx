@@ -13,7 +13,7 @@ import {
   UserPlus,
 } from "lucide-react";
 import { useState } from "react";
-import { cadastrarAdotante, login } from "../../../lib/api";
+import { COLD_START_MESSAGE, cadastrarAdotante, isColdStartError, login } from "../../../lib/api";
 import { tagOptions } from "../../../lib/pets";
 
 export default function LoginCadastro({ onNavigate, onLoginSuccess }) {
@@ -68,7 +68,7 @@ export default function LoginCadastro({ onNavigate, onLoginSuccess }) {
       onLoginSuccess(session);
       onNavigate("match");
     } catch (error) {
-      setMessage(error.message);
+      setMessage(isColdStartError(error) ? COLD_START_MESSAGE : error.message);
     } finally {
       setLoading(false);
     }

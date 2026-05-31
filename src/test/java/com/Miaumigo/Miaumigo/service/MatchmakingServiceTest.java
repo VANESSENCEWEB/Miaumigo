@@ -4,8 +4,11 @@ import com.Miaumigo.Miaumigo.domain.Adotante;
 import com.Miaumigo.Miaumigo.domain.Animal;
 import com.Miaumigo.Miaumigo.domain.AnimalStatus;
 import com.Miaumigo.Miaumigo.domain.Especie;
+import com.Miaumigo.Miaumigo.domain.ExperienciaAnimais;
 import com.Miaumigo.Miaumigo.domain.Porte;
 import com.Miaumigo.Miaumigo.domain.Tag;
+import com.Miaumigo.Miaumigo.domain.TempoDisponivel;
+import com.Miaumigo.Miaumigo.domain.TipoMoradia;
 import com.Miaumigo.Miaumigo.dto.AnimalRecomendadoResponse;
 import com.Miaumigo.Miaumigo.exception.IdentidadeNaoAutenticadaException;
 import com.Miaumigo.Miaumigo.repository.AdotanteRepository;
@@ -42,7 +45,7 @@ class MatchmakingServiceTest {
 		List<AnimalRecomendadoResponse> recomendacoes = matchmakingService.recomendarAnimais(adotanteId);
 
 		assertEquals(List.of("Luna", "Mel", "Thor"), recomendacoes.stream().map(AnimalRecomendadoResponse::nome).toList());
-		assertEquals(List.of(2, 1, 0), recomendacoes.stream().map(AnimalRecomendadoResponse::compatibilidade).toList());
+		assertEquals(List.of(63, 54, 36), recomendacoes.stream().map(AnimalRecomendadoResponse::compatibilidade).toList());
 		verify(animalRepository).findByStatus(AnimalStatus.DISPONIVEL);
 	}
 
@@ -62,7 +65,7 @@ class MatchmakingServiceTest {
 	}
 
 	@Test
-	void deveRetornarAnimaisComZeroCompatibilidade_quandoAdotanteSemPreferencias() {
+	void deveRetornarAnimaisComCompatibilidadeGenerica_quandoAdotanteSemPerfilCompleto() {
 		UUID adotanteId = UUID.randomUUID();
 		when(adotanteRepository.findById(adotanteId)).thenReturn(Optional.of(novoAdotante(List.of())));
 		when(animalRepository.findByStatus(AnimalStatus.DISPONIVEL))
@@ -71,7 +74,63 @@ class MatchmakingServiceTest {
 		List<AnimalRecomendadoResponse> recomendacoes = matchmakingService.recomendarAnimais(adotanteId);
 
 		assertEquals(1, recomendacoes.size());
-		assertEquals(0, recomendacoes.getFirst().compatibilidade());
+		assertEquals(58, recomendacoes.getFirst().compatibilidade());
+	}
+
+	@Test
+	void deveCalcularCompatibilidadeMaior_quandoAnimalAtendePreferenciasENecessidadesDoAdotante() {
+		UUID adotanteId = UUID.randomUUID();
+		Adotante adotante = novoAdotante(List.of(Tag.CALMO, Tag.ADAPTADO_A_APARTAMENTO));
+		adotante.atualizarPerfil(
+				List.of(Especie.GATO),
+				List.of(Tag.CALMO, Tag.ADAPTADO_A_APARTAMENTO),
+				TipoMoradia.APARTAMENTO,
+				Porte.PEQUENO,
+				TempoDisponivel.UMA_HORA,
+				ExperienciaAnimais.JA_TIVE_PETS,
+				false,
+				false,
+				true,
+				null,
+				null
+		);
+		when(adotanteRepository.findById(adotanteId)).thenReturn(Optional.of(adotante));
+		when(animalRepository.findByStatus(AnimalStatus.DISPONIVEL))
+				.thenReturn(List.of(
+						novoAnimal("Luna", List.of(Tag.CALMO, Tag.ADAPTADO_A_APARTAMENTO)),
+						new Animal("Rex", Especie.CACHORRO, Porte.GRANDE, 4, "Descrição", UUID.randomUUID(), List.of(Tag.ENERGICO, Tag.PRECISA_DE_ESPACO), null)
+				));
+
+		List<AnimalRecomendadoResponse> recomendacoes = matchmakingService.recomendarAnimais(adotanteId);
+
+		assertEquals("Luna", recomendacoes.getFirst().nome());
+		assertEquals(98, recomendacoes.getFirst().compatibilidade());
+	}
+
+	@Test
+	void devePenalizarAnimalEnergetico_quandoAdotanteTemPoucoTempo() {
+		UUID adotanteId = UUID.randomUUID();
+		Adotante adotante = novoAdotante(List.of(Tag.ENERGICO));
+		adotante.atualizarPerfil(
+				List.of(Especie.GATO),
+				List.of(Tag.ENERGICO),
+				TipoMoradia.CASA,
+				Porte.MEDIO,
+				TempoDisponivel.ATE_30_MIN,
+				ExperienciaAnimais.JA_TIVE_PETS,
+				false,
+				false,
+				false,
+				null,
+				null
+		);
+		when(adotanteRepository.findById(adotanteId)).thenReturn(Optional.of(adotante));
+		when(animalRepository.findByStatus(AnimalStatus.DISPONIVEL))
+				.thenReturn(List.of(novoAnimal("Thor", List.of(Tag.ENERGICO))));
+
+		List<AnimalRecomendadoResponse> recomendacoes = matchmakingService.recomendarAnimais(adotanteId);
+
+		assertEquals(85, recomendacoes.getFirst().compatibilidade());
 	}
 
 	@Test

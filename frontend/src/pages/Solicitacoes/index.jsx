@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { CheckCircle2, Clock, Home, XCircle } from "lucide-react";
-import { cancelarSolicitacao, listarSolicitacoes } from "../../lib/api";
+import { COLD_START_MESSAGE, cancelarSolicitacao, isColdStartError, listarSolicitacoes } from "../../lib/api";
 import { SectionHeading } from "../Home/shared";
 
 const statusLabels = {
@@ -21,7 +21,7 @@ export default function Solicitacoes({ session, onNavigate }) {
 		try {
 			setRequests(await listarSolicitacoes(session.access_token));
 		} catch (error) {
-			setMessage(error.message);
+			setMessage(isColdStartError(error) ? COLD_START_MESSAGE : error.message);
 		} finally {
 			setLoading(false);
 		}
@@ -45,7 +45,7 @@ export default function Solicitacoes({ session, onNavigate }) {
 			await cancelarSolicitacao(id, session.access_token);
 			await loadRequests();
 		} catch (error) {
-			setMessage(error.message);
+			setMessage(isColdStartError(error) ? COLD_START_MESSAGE : error.message);
 			setLoading(false);
 		}
 	};
