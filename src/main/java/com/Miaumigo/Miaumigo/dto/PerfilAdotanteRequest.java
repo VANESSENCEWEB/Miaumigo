@@ -7,30 +7,14 @@ import com.Miaumigo.Miaumigo.domain.Tag;
 import com.Miaumigo.Miaumigo.domain.TempoDisponivel;
 import com.Miaumigo.Miaumigo.domain.TipoMoradia;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.NotBlank;
 
 import java.util.List;
 
-public record CadastroAdotanteRequest(
-		@NotBlank(message = "Nome do adotante é obrigatório")
-		String nome,
-
-		@NotBlank(message = "Endereço do adotante é obrigatório")
-		String endereco,
-
-		@NotBlank(message = "Email do adotante é obrigatório")
-		String email,
-
-		@NotBlank(message = "Senha do adotante é obrigatória")
-		String senha,
-
-		@NotBlank(message = "CPF do adotante é obrigatório")
-		String cpf,
-
-		List<Tag> preferencias,
-
+public record PerfilAdotanteRequest(
 		@JsonProperty("especies_preferidas")
 		List<Especie> especiesPreferidas,
+
+		List<Tag> preferencias,
 
 		@JsonProperty("tipo_moradia")
 		TipoMoradia tipoMoradia,

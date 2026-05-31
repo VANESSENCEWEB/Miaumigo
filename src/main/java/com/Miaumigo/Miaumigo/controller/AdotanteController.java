@@ -1,8 +1,10 @@
 package com.Miaumigo.Miaumigo.controller;
 
+import com.Miaumigo.Miaumigo.dto.AdotanteMeResponse;
 import com.Miaumigo.Miaumigo.dto.AdotanteResponse;
 import com.Miaumigo.Miaumigo.dto.AnimalRecomendadoResponse;
 import com.Miaumigo.Miaumigo.dto.CadastroAdotanteRequest;
+import com.Miaumigo.Miaumigo.dto.PerfilAdotanteRequest;
 import com.Miaumigo.Miaumigo.dto.SolicitacaoAdocaoResponse;
 import com.Miaumigo.Miaumigo.security.UsuarioAutenticadoService;
 import com.Miaumigo.Miaumigo.service.AdotanteService;
@@ -13,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,6 +50,16 @@ public class AdotanteController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public AdotanteResponse cadastrar(@Valid @RequestBody CadastroAdotanteRequest request) {
 		return adotanteService.cadastrar(request);
+	}
+
+	@GetMapping("/me")
+	public AdotanteMeResponse buscarMeuPerfil(@AuthenticationPrincipal Jwt jwt) {
+		return adotanteService.buscarMeuPerfil(usuarioAutenticadoService.exigirAdotante(jwt));
+	}
+
+	@PatchMapping("/me/perfil")
+	public AdotanteMeResponse atualizarPerfil(@AuthenticationPrincipal Jwt jwt, @RequestBody PerfilAdotanteRequest request) {
+		return adotanteService.atualizarPerfil(usuarioAutenticadoService.exigirAdotante(jwt), request);
 	}
 
 	@GetMapping("/me/animais-recomendados")

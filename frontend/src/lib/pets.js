@@ -54,7 +54,7 @@ export function mapAnimal(animal) {
 		age: formatAge(animal.idade),
 		sex: sexoLabels[animal.sexo] || "Não informado",
 		image: imageFrom(animal.cloudinary_public_id),
-		badge: animal.compatibilidade !== undefined ? `${animal.compatibilidade} match` : statusLabels[animal.status] || "Disponível",
+		badge: animal.compatibilidade !== undefined ? `${animal.compatibilidade}% match` : statusLabels[animal.status] || "Disponível",
 		tags: tags.map((tag) => tagLabels[tag] || tag.toLowerCase()),
 		status: statusLabels[animal.status] || animal.status || "Disponível",
 		history: animal.descricao || "Este pet está aguardando uma família responsável.",

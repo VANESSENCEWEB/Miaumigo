@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowRight,
   CheckCircle2,
@@ -8,55 +8,116 @@ import {
   PawPrint,
   Sparkles,
 } from "lucide-react";
-import { listarRecomendacoes } from "../../lib/api";
-import { mapAnimals } from "../../lib/pets";
+import {
+  atualizarPerfilAdotante,
+  buscarMeuPerfil,
+  COLD_START_MESSAGE,
+  isColdStartError,
+  listarRecomendacoes,
+} from "../../lib/api";
+import { mapAnimals, tagOptions } from "../../lib/pets";
 
-const questions = [
-  {
-    label: "Tipo de moradia",
-    name: "homeType",
-    options: ["Apartamento", "Casa", "Casa com quintal", "Sítio ou chácara"],
-  },
-  {
-    label: "Espaço disponível",
-    name: "space",
-    options: ["Pequeno", "Médio", "Grande"],
-  },
-  {
-    label: "Tempo livre por dia",
-    name: "time",
-    options: ["Até 30 minutos", "1 hora", "2 horas ou mais"],
-  },
-  {
-    label: "Personalidade que combina com você",
-    name: "personality",
-    options: ["Calmo", "Brincalhão", "Independente", "Carinhoso"],
-  },
-  {
-    label: "Experiência com animais",
-    name: "experience",
-    options: ["Primeira adoção", "Já tive pets", "Tenho pets hoje"],
-  },
+const speciesOptions = [
+  { value: "CACHORRO", label: "Cachorro" },
+  { value: "GATO", label: "Gato" },
+  { value: "OUTRO", label: "Outro" },
 ];
+
+const selectOptions = {
+  tipo_moradia: [
+    { value: "APARTAMENTO", label: "Apartamento" },
+    { value: "CASA", label: "Casa" },
+    { value: "CASA_COM_QUINTAL", label: "Casa com quintal" },
+    { value: "SITIO_CHACARA", label: "Sítio ou chácara" },
+  ],
+  espaco_disponivel: [
+    { value: "PEQUENO", label: "Pequeno" },
+    { value: "MEDIO", label: "Médio" },
+    { value: "GRANDE", label: "Grande" },
+  ],
+  tempo_disponivel: [
+    { value: "ATE_30_MIN", label: "Até 30 minutos" },
+    { value: "UMA_HORA", label: "1 hora" },
+    { value: "DUAS_HORAS_OU_MAIS", label: "2 horas ou mais" },
+  ],
+  experiencia_animais: [
+    { value: "PRIMEIRA_ADOCAO", label: "Primeira adoção" },
+    { value: "JA_TIVE_PETS", label: "Já tive pets" },
+    { value: "TENHO_PETS_HOJE", label: "Tenho pets hoje" },
+  ],
+};
+
+const defaultProfile = {
+  especies_preferidas: ["GATO"],
+  preferencias: ["CARINHOSO", "CALMO"],
+  tipo_moradia: "APARTAMENTO",
+  espaco_disponivel: "MEDIO",
+  tempo_disponivel: "UMA_HORA",
+  experiencia_animais: "JA_TIVE_PETS",
+  possui_criancas: false,
+  possui_caes: false,
+  possui_gatos: false,
+  telefone: "",
+  cidade: "",
+};
 
 export default function Match({ session, onNavigate, onSelectPet }) {
   const [stage, setStage] = useState("profile");
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const [profile, setProfile] = useState({
-    homeType: "Apartamento",
-    space: "Médio",
-    time: "1 hora",
-    personality: "Carinhoso",
-    experience: "Já tive pets",
-  });
+  const [profile, setProfile] = useState(defaultProfile);
+
+  useEffect(() => {
+    if (!session) {
+      return;
+    }
+    let active = true;
+
+    async function loadProfile() {
+      setLoading(true);
+      setMessage("");
+      try {
+        const perfil = await buscarMeuPerfil(session.access_token);
+        if (!active) {
+          return;
+        }
+        setProfile(toFormProfile(perfil));
+        if (perfil.perfil_completo) {
+          await loadMatches();
+        }
+      } catch (error) {
+        if (active) {
+          setMessage(isColdStartError(error) ? COLD_START_MESSAGE : error.message);
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadProfile();
+    return () => {
+      active = false;
+    };
+  }, [session]);
 
   const updateProfile = (name, value) => {
     setProfile((current) => ({ ...current, [name]: value }));
   };
 
-  const loadMatches = async () => {
+  const toggleListValue = (name, value) => {
+    setProfile((current) => {
+      const values = current[name] || [];
+      const nextValues = values.includes(value)
+        ? values.filter((item) => item !== value)
+        : [...values, value];
+      return { ...current, [name]: nextValues };
+    });
+  };
+
+  const saveProfileAndLoadMatches = async () => {
     if (!session) {
       onNavigate("login");
       return;
@@ -64,22 +125,40 @@ export default function Match({ session, onNavigate, onSelectPet }) {
     setLoading(true);
     setMessage("");
     try {
-      const recomendacoes = await listarRecomendacoes(session.access_token);
-      setMatches(mapAnimals(recomendacoes));
-      setStage("results");
+      const perfil = await atualizarPerfilAdotante(profile, session.access_token);
+      setProfile(toFormProfile(perfil));
+      await loadMatches();
     } catch (error) {
-      setMessage(error.message);
+      setMessage(isColdStartError(error) ? COLD_START_MESSAGE : error.message);
     } finally {
       setLoading(false);
     }
   };
 
+  const loadMatches = async () => {
+    if (!session) {
+      onNavigate("login");
+      return;
+    }
+    const recomendacoes = await listarRecomendacoes(session.access_token);
+    setMatches(mapAnimals(recomendacoes));
+    setStage("results");
+  };
+
   if (stage === "results") {
-    return <MatchResults profile={profile} pets={matches} onNavigate={onNavigate} onSelectPet={onSelectPet} onRestart={() => setStage("profile")} />;
+    return (
+      <MatchResults
+        profile={profile}
+        pets={matches}
+        onNavigate={onNavigate}
+        onSelectPet={onSelectPet}
+        onRestart={() => setStage("profile")}
+      />
+    );
   }
 
   return (
-    <section className={`match-page standalone-page match-page-${stage}`}>
+    <section className="match-page standalone-page match-page-profile">
       <div className="match-intro">
         <div>
           <span>
@@ -87,58 +166,99 @@ export default function Match({ session, onNavigate, onSelectPet }) {
             Match MiAUmigos
           </span>
           <h1>Encontre seu novo melhor amigo</h1>
-          <p>
-            Responda algumas perguntas e descubra pets que combinam com sua rotina e seu jeito de viver.
-          </p>
+          <p>Seu perfil salva suas preferências para calcular compatibilidade com pets disponíveis.</p>
           <ul>
-            <li>✔ Compatibilidade com sua rotina</li>
-            <li>✔ Pets ideais para seu espaço</li>
-            <li>✔ Recomendações personalizadas</li>
-            <li>✔ Matches mais compatíveis com você</li>
-            <li>✔ Processo simples e acolhedor</li>
+            <li>✔ Compatibilidade em porcentagem</li>
+            <li>✔ Perfil salvo para os próximos matches</li>
+            <li>✔ Tags de comportamento do pet em destaque</li>
           </ul>
           <p className="match-intro-note">💛 O começo de uma nova amizade.</p>
-          {stage === "intro" && (
-            <button className="primary-action" onClick={() => setStage("profile")}>
-              <Heart size={17} fill="currentColor" />
-              Iniciar Match
-            </button>
-          )}
         </div>
       </div>
 
-      {stage === "profile" && (
-        <form className="match-form" onSubmit={(event) => event.preventDefault()}>
-          <div className="section-heading">
-            <span>Seu perfil de adoção</span>
-            <h2>Monte seu perfil de adoção</h2>
-            <p>Conte sobre sua rotina e preferências para recomendarmos pets compatíveis com você.</p>
-          </div>
+      <form className="match-form" onSubmit={(event) => event.preventDefault()}>
+        <div className="section-heading">
+          <span>Seu perfil de adoção</span>
+          <h2>Complete seu perfil</h2>
+          <p>Essas informações serão usadas nas recomendações e reaproveitadas na adoção.</p>
+        </div>
 
-          <div className="match-question-grid">
-            {questions.map((question) => (
-              <label key={question.name}>
-                {question.label}
-                <select
-                  value={profile[question.name]}
-                  onChange={(event) => updateProfile(question.name, event.target.value)}
-                >
-                  {question.options.map((option) => (
-                    <option key={option}>{option}</option>
-                  ))}
-                </select>
+        <fieldset className="auth-preferences">
+          <legend>Espécies preferidas</legend>
+          <div>
+            {speciesOptions.map((option) => (
+              <label key={option.value}>
+                <input
+                  type="checkbox"
+                  checked={profile.especies_preferidas.includes(option.value)}
+                  onChange={() => toggleListValue("especies_preferidas", option.value)}
+                />
+                {option.label}
               </label>
             ))}
           </div>
+        </fieldset>
 
-          {message && <p className="form-message">{message}</p>}
-          <button className="primary-action match-submit" type="button" onClick={loadMatches} disabled={loading}>
-            {loading ? "Buscando matches..." : "Ver pets compatíveis"}
-            <ArrowRight size={17} />
-          </button>
-        </form>
-      )}
+        <fieldset className="auth-preferences">
+          <legend>Comportamentos preferidos</legend>
+          <div>
+            {tagOptions.map((option) => (
+              <label key={option.value}>
+                <input
+                  type="checkbox"
+                  checked={profile.preferencias.includes(option.value)}
+                  onChange={() => toggleListValue("preferencias", option.value)}
+                />
+                {option.label}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <div className="match-question-grid">
+          <SelectField label="Tipo de moradia" name="tipo_moradia" value={profile.tipo_moradia} onChange={updateProfile} />
+          <SelectField label="Espaço disponível" name="espaco_disponivel" value={profile.espaco_disponivel} onChange={updateProfile} />
+          <SelectField label="Tempo livre por dia" name="tempo_disponivel" value={profile.tempo_disponivel} onChange={updateProfile} />
+          <SelectField label="Experiência com animais" name="experiencia_animais" value={profile.experiencia_animais} onChange={updateProfile} />
+        </div>
+
+        <div className="match-question-grid">
+          <BooleanField label="Tenho crianças em casa" name="possui_criancas" checked={profile.possui_criancas} onChange={updateProfile} />
+          <BooleanField label="Tenho cães em casa" name="possui_caes" checked={profile.possui_caes} onChange={updateProfile} />
+          <BooleanField label="Tenho gatos em casa" name="possui_gatos" checked={profile.possui_gatos} onChange={updateProfile} />
+        </div>
+
+        {message && <p className="form-message">{message}</p>}
+        <button className="primary-action match-submit" type="button" onClick={saveProfileAndLoadMatches} disabled={loading}>
+          {loading ? "Buscando matches..." : "Salvar e ver pets compatíveis"}
+          <ArrowRight size={17} />
+        </button>
+      </form>
     </section>
+  );
+}
+
+function SelectField({ label, name, value, onChange }) {
+  return (
+    <label>
+      {label}
+      <select value={value} onChange={(event) => onChange(name, event.target.value)}>
+        {selectOptions[name].map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function BooleanField({ label, name, checked, onChange }) {
+  return (
+    <label className="match-toggle-field">
+      <input type="checkbox" checked={checked} onChange={(event) => onChange(name, event.target.checked)} />
+      {label}
+    </label>
   );
 }
 
@@ -152,13 +272,10 @@ function MatchResults({ profile, pets, onNavigate, onSelectPet, onRestart }) {
             Resultado do match
           </span>
           <h1>Pets compatíveis com você</h1>
-          <p>
-            Cruzamos moradia, espaço, tempo livre, personalidade e experiência
-            para sugerir pets com mais chance de adaptação.
-          </p>
+          <p>Veja a porcentagem de compatibilidade e os comportamentos de cada pet.</p>
         </div>
         <button className="secondary-action" onClick={onRestart}>
-          Ajustar respostas
+          Ajustar perfil
           <ArrowRight size={17} />
         </button>
       </div>
@@ -169,19 +286,19 @@ function MatchResults({ profile, pets, onNavigate, onSelectPet, onRestart }) {
           <div>
             <span>
               <Home size={17} />
-              {profile.homeType} · espaço {profile.space.toLowerCase()}
+              {labelFor("tipo_moradia", profile.tipo_moradia)} · espaço {labelFor("espaco_disponivel", profile.espaco_disponivel).toLowerCase()}
             </span>
             <span>
               <MapPin size={17} />
-              Recife e região
+              {profile.cidade || "Cidade não informada"}
             </span>
             <span>
               <Heart size={17} />
-              {profile.personality} · {profile.time}
+              {labelFor("tempo_disponivel", profile.tempo_disponivel)}
             </span>
             <span>
               <PawPrint size={17} />
-              {profile.experience}
+              {labelFor("experiencia_animais", profile.experiencia_animais)}
             </span>
           </div>
           <button className="primary-action" onClick={() => onNavigate("adoption")}>
@@ -192,17 +309,19 @@ function MatchResults({ profile, pets, onNavigate, onSelectPet, onRestart }) {
         <div className="match-results">
           {pets.length === 0 && <p>Nenhum pet disponível para suas recomendações agora.</p>}
           {pets.map((pet) => (
-            <article className="match-card" key={pet.name}>
+            <article className="match-card" key={pet.id || pet.name}>
               <img src={pet.image} alt={pet.name} />
               <div className="match-card-body">
                 <div className="match-score">
-                  <strong>{pet.score}</strong>
-                  <span>pontos de compatibilidade</span>
+                  <strong>{pet.score}%</strong>
+                  <span>compatibilidade</span>
                 </div>
                 <h3>{pet.name}</h3>
                 <p>{pet.personality}</p>
                 <div className="match-tags">
-                  <span>{pet.city}</span>
+                  {pet.tags.map((tag) => (
+                    <span key={tag}>{tag}</span>
+                  ))}
                   <span>{pet.age}</span>
                   <span>{pet.size}</span>
                 </div>
@@ -217,4 +336,25 @@ function MatchResults({ profile, pets, onNavigate, onSelectPet, onRestart }) {
       </div>
     </section>
   );
+}
+
+function toFormProfile(perfil) {
+  return {
+    ...defaultProfile,
+    especies_preferidas: perfil.especies_preferidas?.length ? perfil.especies_preferidas : defaultProfile.especies_preferidas,
+    preferencias: perfil.preferencias?.length ? perfil.preferencias : defaultProfile.preferencias,
+    tipo_moradia: perfil.tipo_moradia || defaultProfile.tipo_moradia,
+    espaco_disponivel: perfil.espaco_disponivel || defaultProfile.espaco_disponivel,
+    tempo_disponivel: perfil.tempo_disponivel || defaultProfile.tempo_disponivel,
+    experiencia_animais: perfil.experiencia_animais || defaultProfile.experiencia_animais,
+    possui_criancas: Boolean(perfil.possui_criancas),
+    possui_caes: Boolean(perfil.possui_caes),
+    possui_gatos: Boolean(perfil.possui_gatos),
+    telefone: perfil.telefone || "",
+    cidade: perfil.cidade || "",
+  };
+}
+
+function labelFor(group, value) {
+  return selectOptions[group].find((option) => option.value === value)?.label || "Não informado";
 }

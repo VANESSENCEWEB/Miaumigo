@@ -27,7 +27,7 @@ import Match from "../Match";
 import Ongs from "../Ongs";
 import SobrePets from "../SobrePets";
 import Solicitacoes from "../Solicitacoes";
-import { buscarAnimal, clearSession, listarAnimaisDisponiveis, loadSession, saveSession } from "../../lib/api";
+import { COLD_START_MESSAGE, buscarAnimal, clearSession, isColdStartError, listarAnimaisDisponiveis, loadSession, saveSession } from "../../lib/api";
 import { mapAnimal, mapAnimals } from "../../lib/pets";
 import { helpOptions, orgs, petCategories, stories } from "./data";
 import { PetCard } from "./shared";
@@ -42,10 +42,12 @@ export default function Home() {
   const [catalogPets, setCatalogPets] = useState([]);
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [apiError, setApiError] = useState("");
+  const [appLoadingMessage, setAppLoadingMessage] = useState("");
   const [session, setSession] = useState(() => loadSession());
 
   useEffect(() => {
     let active = true;
+    let retryId = null;
 
     async function loadCatalog() {
       setCatalogLoading(true);
@@ -54,14 +56,19 @@ export default function Home() {
         const animais = await listarAnimaisDisponiveis();
         if (active) {
           setCatalogPets(mapAnimals(animais));
+          setAppLoadingMessage("");
+          setCatalogLoading(false);
         }
       } catch (error) {
         if (active) {
           setCatalogPets([]);
+          if (isColdStartError(error)) {
+            setAppLoadingMessage(COLD_START_MESSAGE);
+            retryId = window.setTimeout(loadCatalog, 5000);
+            return;
+          }
+          setAppLoadingMessage("");
           setApiError(error.message);
-        }
-      } finally {
-        if (active) {
           setCatalogLoading(false);
         }
       }
@@ -70,6 +77,9 @@ export default function Home() {
     loadCatalog();
     return () => {
       active = false;
+      if (retryId) {
+        window.clearTimeout(retryId);
+      }
     };
   }, []);
 
@@ -105,8 +115,13 @@ export default function Home() {
     try {
       const animal = await buscarAnimal(pet.id);
       setSelectedPet(mapAnimal(animal));
+      setAppLoadingMessage("");
     } catch (error) {
-      setApiError(error.message);
+      if (isColdStartError(error)) {
+        setAppLoadingMessage(COLD_START_MESSAGE);
+      } else {
+        setApiError(error.message);
+      }
     }
   };
 
@@ -128,6 +143,7 @@ export default function Home() {
       />
 
       <main>
+        {appLoadingMessage && <div className="api-alert">{appLoadingMessage}</div>}
         {apiError && <div className="api-alert">Não foi possível sincronizar com a API: {apiError}</div>}
         {activePage === "home" && <HomeLanding pets={catalogPets} loading={catalogLoading} onNavigate={navigate} onMatch={goToMatch} onSelectPet={openPetDetails} />}
         {activePage === "pets" && <Encontrar pets={catalogPets} loading={catalogLoading} searchTerm={searchTerm} onSearch={setSearchTerm} onSelectPet={openPetDetails} />}

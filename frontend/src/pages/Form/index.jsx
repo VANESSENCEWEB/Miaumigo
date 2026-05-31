@@ -1,12 +1,49 @@
 import { CheckCircle2, HeartHandshake, Home, PawPrint } from "lucide-react";
-import { useState } from "react";
-import { solicitarAdocao } from "../../lib/api";
+import { useEffect, useState } from "react";
+import { atualizarPerfilAdotante, buscarMeuPerfil, COLD_START_MESSAGE, isColdStartError, solicitarAdocao } from "../../lib/api";
 import { SectionHeading } from "../Home/shared";
 
 export default function Form({ pet, session, onNavigate, onSubmitted }) {
   const [sent, setSent] = useState(false);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [profile, setProfile] = useState(null);
+  const [contact, setContact] = useState({ telefone: "", cidade: "" });
+
+  useEffect(() => {
+    if (!session) {
+      return;
+    }
+    let active = true;
+
+    async function loadProfile() {
+      setLoading(true);
+      setMessage("");
+      try {
+        const perfil = await buscarMeuPerfil(session.access_token);
+        if (active) {
+          setProfile(perfil);
+          setContact({
+            telefone: perfil.telefone || "",
+            cidade: perfil.cidade || "",
+          });
+        }
+      } catch (error) {
+        if (active) {
+          setMessage(isColdStartError(error) ? COLD_START_MESSAGE : error.message);
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadProfile();
+    return () => {
+      active = false;
+    };
+  }, [session]);
 
   const submitInterest = async () => {
     if (!session) {
@@ -20,11 +57,33 @@ export default function Form({ pet, session, onNavigate, onSubmitted }) {
     setLoading(true);
     setMessage("");
     try {
+      if (!contact.telefone.trim() || !contact.cidade.trim()) {
+        setMessage("Informe telefone e cidade para continuar.");
+        return;
+      }
+      if (profile) {
+        await atualizarPerfilAdotante(
+          {
+            especies_preferidas: profile.especies_preferidas || [],
+            preferencias: profile.preferencias || [],
+            tipo_moradia: profile.tipo_moradia,
+            espaco_disponivel: profile.espaco_disponivel,
+            tempo_disponivel: profile.tempo_disponivel,
+            experiencia_animais: profile.experiencia_animais,
+            possui_criancas: profile.possui_criancas,
+            possui_caes: profile.possui_caes,
+            possui_gatos: profile.possui_gatos,
+            telefone: contact.telefone,
+            cidade: contact.cidade,
+          },
+          session.access_token
+        );
+      }
       await solicitarAdocao(pet.id, session.access_token);
       setSent(true);
       onSubmitted?.();
     } catch (error) {
-      setMessage(error.message);
+      setMessage(isColdStartError(error) ? COLD_START_MESSAGE : error.message);
     } finally {
       setLoading(false);
     }
@@ -77,41 +136,20 @@ export default function Form({ pet, session, onNavigate, onSubmitted }) {
           </label>
           <label>
             Telefone
-            <input placeholder="(00) 00000-0000" />
+            <input value={contact.telefone} onChange={(event) => setContact((current) => ({ ...current, telefone: event.target.value }))} placeholder="(00) 00000-0000" />
           </label>
           <label>
             Cidade
-            <input placeholder="Sua cidade" />
-          </label>
-          <label>
-            Tipo de moradia
-            <select defaultValue="">
-              <option value="" disabled>
-                Selecione
-              </option>
-              <option>Casa</option>
-              <option>Apartamento</option>
-              <option>Outro</option>
-            </select>
-          </label>
-          <label>
-            Qual tipo de pet você procura?
-            <select defaultValue="">
-              <option value="" disabled>
-                Selecione
-              </option>
-              <option>Cachorro</option>
-              <option>Gato</option>
-              <option>Filhote</option>
-              <option>Ainda estou escolhendo</option>
-            </select>
+            <input value={contact.cidade} onChange={(event) => setContact((current) => ({ ...current, cidade: event.target.value }))} placeholder="Sua cidade" />
           </label>
         </div>
 
-        <label>
-          Conte sobre sua rotina
-          <textarea placeholder="Horários, pessoas na casa, outros pets e experiência anterior." />
-        </label>
+        {profile && (
+          <div className="adoption-profile-summary">
+            <span>Perfil de adoção</span>
+            <p>{profile.tipo_moradia || "Moradia não informada"} · {profile.espaco_disponivel || "espaço não informado"} · {profile.tempo_disponivel || "tempo não informado"}</p>
+          </div>
+        )}
 
         {message && <p className="form-message">{message}</p>}
 
