@@ -400,10 +400,10 @@ function PetPreview({ pets, loading, onNavigate, onSelectPet }) {
 
 function HowItWorks() {
   const steps = [
-    { title: "Cadastre-se", text: "Conte sobre você e o tipo de pet ideal.", icon: CalendarCheck },
-    { title: "Receba matches", text: "Nosso algoritmo encontra pets compatíveis.", icon: PawPrint },
-    { title: "Converse", text: "Fale com a ONG ou protetor responsável.", icon: MessageCircle },
-    { title: "Adoção com amor", text: "Finalize a adoção e realize um novo melhor amigo.", icon: HomeIcon },
+    { title: "Cadastre-se", text: "Conte sobre você e o tipo de pet ideal.", icon: CalendarCheck, tone: "blue" },
+    { title: "Receba matches", text: "Nosso algoritmo encontra pets compatíveis.", icon: PawPrint, tone: "yellow" },
+    { title: "Converse", text: "Fale com a ONG ou protetor responsável.", icon: MessageCircle, tone: "green" },
+    { title: "Adoção com amor", text: "Finalize a adoção e realize um novo melhor amigo.", icon: HomeIcon, tone: "pink" },
   ];
 
   return (
@@ -414,9 +414,9 @@ function HowItWorks() {
           <h2>Um processo simples, seguro e cheio de amor.</h2>
         </div>
         <div className="timeline">
-          {steps.map(({ title, text, icon: Icon }, index) => (
+          {steps.map(({ title, text, icon: Icon, tone }, index) => (
             <article className="timeline-step" key={title}>
-              <div className="timeline-icon">
+              <div className={`timeline-icon timeline-icon-${tone}`}>
                 <Icon size={28} />
               </div>
               <span>{index + 1}</span>
@@ -527,9 +527,30 @@ function Footer({ onNavigate, onSupport }) {
           </button>
           <p>Conectando pets a lares cheios de amor em Pernambuco.</p>
           <div className="footer-social">
-            <button aria-label="Instagram">ig</button>
-            <button aria-label="Facebook">f</button>
-            <button aria-label="Comunidade">◎</button>
+            <button aria-label="Instagram">
+              <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18">
+                <path
+                  d="M7.6 2.75h8.8A4.86 4.86 0 0 1 21.25 7.6v8.8a4.86 4.86 0 0 1-4.85 4.85H7.6a4.86 4.86 0 0 1-4.85-4.85V7.6A4.86 4.86 0 0 1 7.6 2.75Zm0 1.7A3.15 3.15 0 0 0 4.45 7.6v8.8a3.15 3.15 0 0 0 3.15 3.15h8.8a3.15 3.15 0 0 0 3.15-3.15V7.6a3.15 3.15 0 0 0-3.15-3.15H7.6Zm4.4 3.18a4.37 4.37 0 1 1 0 8.74 4.37 4.37 0 0 1 0-8.74Zm0 1.7a2.67 2.67 0 1 0 0 5.34 2.67 2.67 0 0 0 0-5.34Zm4.58-2.36a1.02 1.02 0 1 1 0 2.04 1.02 1.02 0 0 1 0-2.04Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </button>
+            <button aria-label="Facebook">
+              <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18">
+                <path
+                  d="M13.45 21.5v-8.3h2.8l.42-3.23h-3.22V7.91c0-.94.26-1.58 1.61-1.58h1.72V3.44a22.7 22.7 0 0 0-2.5-.13c-2.48 0-4.18 1.51-4.18 4.29v2.37H7.3v3.23h2.8v8.3h3.35Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </button>
+            <button aria-label="LinkedIn">
+              <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18">
+                <path
+                  d="M6.94 8.98H3.7v10.6h3.24V8.98ZM5.32 4.2c-1.04 0-1.72.69-1.72 1.6 0 .89.66 1.59 1.68 1.59h.02c1.07 0 1.73-.7 1.73-1.59-.02-.91-.66-1.6-1.71-1.6Zm14.98 9.3c0-3.25-1.73-4.76-4.04-4.76-1.86 0-2.69 1.02-3.15 1.74v-1.5H9.87c.04.99 0 10.6 0 10.6h3.24v-5.92c0-.32.02-.63.12-.86.26-.63.84-1.29 1.82-1.29 1.29 0 1.8.98 1.8 2.41v5.66h3.24l.01-6.08Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </button>
           </div>
         </div>
 
