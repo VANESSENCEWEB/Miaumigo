@@ -1,5 +1,5 @@
 import { ArrowRight, CheckCircle2, Headphones, Lock, Mail, MessageCircle, ShieldCheck } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { COLD_START_MESSAGE, enviarMensagemSuporte, getAdotanteSession, isColdStartError } from "../../lib/api";
 import { SectionHeading } from "../Home/shared";
 
@@ -14,12 +14,6 @@ export default function Suporte({ session, onNavigate }) {
   const [message, setMessage] = useState("");
   const [success, setSuccess] = useState(false);
   const adotanteSession = getAdotanteSession(session);
-
-  useEffect(() => {
-    if (!adotanteSession) {
-      onNavigate("login");
-    }
-  }, [adotanteSession, onNavigate]);
 
   const updateField = (field, value) => {
     setForm((current) => ({ ...current, [field]: value }));

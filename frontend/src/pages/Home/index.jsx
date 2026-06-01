@@ -123,18 +123,9 @@ export default function Home() {
     const adotanteSession = getAdotanteSession(session);
     if (adotanteSession) {
       setSession(adotanteSession);
-      setAppLoadingMessage("");
-      navigate("support");
-      return;
     }
-    const storedSession = loadSession();
-    if (storedSession) {
-      setSession(storedSession);
-      setAppLoadingMessage("Entre com uma conta de adotante para falar com o suporte.");
-    } else {
-      setSession(null);
-    }
-    navigate("login");
+    setAppLoadingMessage("");
+    navigate("support");
   };
 
   const openPetDetails = async (pet) => {
