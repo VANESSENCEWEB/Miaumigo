@@ -185,7 +185,7 @@ export default function Home() {
         {activePage === "how" && <Como onNavigate={navigate} />}
         {activePage === "orgs" && <Ongs />}
         {activePage === "stories" && <Historias />}
-        {activePage === "help" && <Ajuda />}
+        {activePage === "help" && <Ajuda onSupport={goToSupport} />}
         {activePage === "adoption" && <Form pet={selectedPet} session={session} onNavigate={navigate} onSubmitted={() => navigate("requests")} />}
         {activePage === "login" && <LoginCadastro onNavigate={navigate} onLoginSuccess={handleSession} />}
         {activePage === "match" && <Match session={session} onNavigate={navigate} onSelectPet={openPetDetails} />}
@@ -203,6 +203,11 @@ function isApiPet(pet) {
 }
 
 function Header({ activePage, menuOpen, session, onLogout, onMenu, onNavigate, onMatch, onSupport }) {
+  const helpMenuOptions = [
+    ...helpOptions,
+    { label: "Fale conosco", icon: MessageCircle, onClick: onSupport },
+  ];
+
   return (
     <header className="site-header">
       <div className="header-row">
@@ -231,10 +236,7 @@ function Header({ activePage, menuOpen, session, onLogout, onMenu, onNavigate, o
           <NavButton active={activePage === "stories"} onClick={() => onNavigate("stories")}>
             Histórias
           </NavButton>
-          <NavButton active={activePage === "support"} onClick={onSupport}>
-            Suporte
-          </NavButton>
-          <Dropdown label="Ajuda" active={activePage === "help"} items={helpOptions} onMain={() => onNavigate("help")} />
+          <Dropdown label="Ajuda" active={activePage === "help" || activePage === "support"} items={helpMenuOptions} onMain={() => onNavigate("help")} />
         </nav>
 
         <div className="header-actions">
@@ -278,8 +280,8 @@ function Dropdown({ label, active, items, onMain }) {
         <ChevronDown size={14} />
       </button>
       <div className="dropdown-menu">
-        {items.map(({ label: itemLabel, icon: Icon }) => (
-          <button key={itemLabel} onClick={onMain}>
+        {items.map(({ label: itemLabel, icon: Icon, onClick }) => (
+          <button key={itemLabel} onClick={onClick || onMain}>
             <Icon size={16} />
             {itemLabel}
           </button>
