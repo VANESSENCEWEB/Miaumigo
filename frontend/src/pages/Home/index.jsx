@@ -27,7 +27,7 @@ import Match from "../Match";
 import Ongs from "../Ongs";
 import SobrePets from "../SobrePets";
 import Solicitacoes from "../Solicitacoes";
-import { COLD_START_MESSAGE, buscarAnimal, clearSession, isColdStartError, listarAnimaisDisponiveis, loadSession, saveSession } from "../../lib/api";
+import { COLD_START_MESSAGE, buscarAnimal, clearSession, getAdotanteSession, isColdStartError, listarAnimaisDisponiveis, loadSession, saveSession } from "../../lib/api";
 import { mapAnimal, mapAnimals } from "../../lib/pets";
 import { helpOptions, orgs, petCategories, stories } from "./data";
 import { PetCard } from "./shared";
@@ -101,7 +101,21 @@ export default function Home() {
   };
 
   const goToMatch = () => {
-    navigate(session ? "match" : "login");
+    const adotanteSession = getAdotanteSession(session);
+    if (adotanteSession) {
+      setSession(adotanteSession);
+      setAppLoadingMessage("");
+      navigate("match");
+      return;
+    }
+    const storedSession = loadSession();
+    if (storedSession) {
+      setSession(storedSession);
+      setAppLoadingMessage("Entre com uma conta de adotante para fazer match.");
+    } else {
+      setSession(null);
+    }
+    navigate("login");
   };
 
   const openPetDetails = async (pet) => {

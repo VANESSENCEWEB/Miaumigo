@@ -4,6 +4,7 @@ const COLD_START_CODE = "COLD_START_TIMEOUT";
 export const COLD_START_MESSAGE = "Carregando aplicação. A primeira resposta pode demorar enquanto o servidor inicia.";
 
 const SESSION_KEY = "miaumigo_session";
+const PAPEL_ADOTANTE = "ADOTANTE";
 
 export function loadSession() {
 	const rawSession = localStorage.getItem(SESSION_KEY);
@@ -11,7 +12,12 @@ export function loadSession() {
 		return null;
 	}
 	try {
-		return JSON.parse(rawSession);
+		const session = JSON.parse(rawSession);
+		if (!hasValidToken(session) || isSessionExpired(session)) {
+			localStorage.removeItem(SESSION_KEY);
+			return null;
+		}
+		return session;
 	} catch {
 		localStorage.removeItem(SESSION_KEY);
 		return null;
@@ -24,6 +30,22 @@ export function saveSession(session) {
 
 export function clearSession() {
 	localStorage.removeItem(SESSION_KEY);
+}
+
+export function getAdotanteSession(currentSession = null) {
+	const session = hasValidToken(currentSession) ? currentSession : loadSession();
+	if (!session) {
+		return null;
+	}
+	if (isSessionExpired(session)) {
+		clearSession();
+		return null;
+	}
+	return isAdotanteSession(session) ? session : null;
+}
+
+export function isAdotanteSession(session) {
+	return hasValidToken(session) && session.usuario?.papel === PAPEL_ADOTANTE;
 }
 
 export async function login(credentials) {
@@ -156,4 +178,19 @@ export class ApiError extends Error {
 		this.data = data;
 		this.code = code;
 	}
+}
+
+function hasValidToken(session) {
+	return Boolean(session?.access_token);
+}
+
+function isSessionExpired(session) {
+	if (!session?.expira_em) {
+		return false;
+	}
+	const expiration = Date.parse(session.expira_em);
+	if (Number.isNaN(expiration)) {
+		return false;
+	}
+	return expiration <= Date.now();
 }
