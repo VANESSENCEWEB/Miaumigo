@@ -1,7 +1,10 @@
 package com.Miaumigo.Miaumigo.controller;
 
 import com.Miaumigo.Miaumigo.domain.SolicitacaoStatus;
+import com.Miaumigo.Miaumigo.dto.MensagemSuporteResponse;
 import com.Miaumigo.Miaumigo.dto.SolicitacaoAdocaoResponse;
+import com.Miaumigo.Miaumigo.domain.MensagemSuporteStatus;
+import com.Miaumigo.Miaumigo.service.MensagemSuporteService;
 import com.Miaumigo.Miaumigo.service.MatchmakingService;
 import com.Miaumigo.Miaumigo.service.SolicitacaoAdocaoService;
 import org.junit.jupiter.api.Test;
@@ -21,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -43,6 +47,9 @@ class AdotanteJwtSecurityTest {
 
 	@MockitoBean
 	private SolicitacaoAdocaoService solicitacaoService;
+
+	@MockitoBean
+	private MensagemSuporteService mensagemSuporteService;
 
 	@Test
 	void deveRetornarUnauthorized_quandoRecomendacoesSemToken() throws Exception {
@@ -96,6 +103,48 @@ class AdotanteJwtSecurityTest {
 		verify(solicitacaoService).listarDoAdotante(adotanteId);
 	}
 
+	@Test
+	void deveRetornarUnauthorized_quandoMensagemSuporteSemToken() throws Exception {
+		mockMvc.perform(post("/api/v1/adotantes/me/suporte")
+						.contentType("application/json")
+						.content(requestSuporte()))
+				.andExpect(status().isUnauthorized());
+	}
+
+	@Test
+	void deveRetornarForbidden_quandoMensagemSuporteTokenNaoForDeAdotante() throws Exception {
+		UUID usuarioId = UUID.randomUUID();
+
+		mockMvc.perform(post("/api/v1/adotantes/me/suporte")
+						.header("Authorization", "Bearer " + token(usuarioId, "OPERADOR"))
+						.contentType("application/json")
+						.content(requestSuporte()))
+				.andExpect(status().isForbidden())
+				.andExpect(jsonPath("$.mensagem").value("Acesso permitido apenas para adotantes."));
+	}
+
+	@Test
+	void deveCriarMensagemSuporte_quandoTokenForDeAdotante() throws Exception {
+		UUID adotanteId = UUID.fromString("22222222-2222-2222-2222-222222222222");
+		UUID mensagemId = UUID.fromString("33333333-3333-3333-3333-333333333333");
+		when(mensagemSuporteService.criar(any(), any())).thenReturn(new MensagemSuporteResponse(
+				mensagemId,
+				"Dúvida sobre adoção",
+				"Gostaria de entender melhor o processo.",
+				MensagemSuporteStatus.NOVA,
+				LocalDateTime.now()
+		));
+
+		mockMvc.perform(post("/api/v1/adotantes/me/suporte")
+						.header("Authorization", "Bearer " + token(adotanteId, "ADOTANTE"))
+						.contentType("application/json")
+						.content(requestSuporte()))
+				.andExpect(status().isCreated())
+				.andExpect(jsonPath("$.status").value("NOVA"));
+
+		verify(mensagemSuporteService).criar(any(), any());
+	}
+
 	private String token(UUID usuarioId, String papel) {
 		Instant agora = Instant.now();
 		JwtClaimsSet claims = JwtClaimsSet.builder()
@@ -107,5 +156,14 @@ class AdotanteJwtSecurityTest {
 				.build();
 		JwsHeader header = JwsHeader.with(MacAlgorithm.HS256).build();
 		return jwtEncoder.encode(JwtEncoderParameters.from(header, claims)).getTokenValue();
+	}
+
+	private String requestSuporte() {
+		return """
+				{
+					"assunto": "Dúvida sobre adoção",
+					"mensagem": "Gostaria de entender melhor o processo."
+				}
+				""";
 	}
 }

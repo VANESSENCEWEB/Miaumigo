@@ -3368,3 +3368,100 @@ button {
   font-weight: 800;
   color: var(--accent);
 }
+
+.support-layout {
+  width: min(1040px, 100%);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(280px, 0.9fr) minmax(360px, 1.1fr);
+  gap: 22px;
+  align-items: stretch;
+}
+
+.support-aside,
+.support-form {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: var(--card-shadow);
+}
+
+.support-aside {
+  display: grid;
+  align-content: center;
+  gap: 16px;
+  padding: 28px;
+  background:
+    radial-gradient(circle at 90% 15%, rgba(255, 183, 3, 0.16), transparent 28%),
+    linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+}
+
+.support-aside > span,
+.support-aside div span,
+.support-success {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.support-aside > span {
+  justify-self: start;
+  padding: 8px 12px;
+  color: var(--blue);
+  background: #eaf5ff;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.support-aside h2 {
+  margin: 0;
+  max-width: 420px;
+  color: var(--ink);
+  font-size: clamp(30px, 4vw, 46px);
+  line-height: 1.02;
+}
+
+.support-aside p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.support-aside div {
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.support-aside div span {
+  color: #334155;
+  font-weight: 800;
+}
+
+.support-aside div svg {
+  color: var(--blue);
+}
+
+.support-form {
+  padding: 28px;
+}
+
+.support-form textarea {
+  resize: vertical;
+}
+
+.support-success {
+  margin: 0;
+  padding: 12px 14px;
+  color: #166534;
+  background: #dcfce7;
+  border-radius: 8px;
+  font-weight: 800;
+}
+
+@media (max-width: 900px) {
+  .support-layout {
+    grid-template-columns: 1fr;
+  }
+}

@@ -27,6 +27,7 @@ import Match from "../Match";
 import Ongs from "../Ongs";
 import SobrePets from "../SobrePets";
 import Solicitacoes from "../Solicitacoes";
+import Suporte from "../Suporte";
 import { COLD_START_MESSAGE, buscarAnimal, clearSession, getAdotanteSession, isColdStartError, listarAnimaisDisponiveis, loadSession, saveSession } from "../../lib/api";
 import { mapAnimal, mapAnimals } from "../../lib/pets";
 import { helpOptions, orgs, petCategories, stories } from "./data";
@@ -118,6 +119,24 @@ export default function Home() {
     navigate("login");
   };
 
+  const goToSupport = () => {
+    const adotanteSession = getAdotanteSession(session);
+    if (adotanteSession) {
+      setSession(adotanteSession);
+      setAppLoadingMessage("");
+      navigate("support");
+      return;
+    }
+    const storedSession = loadSession();
+    if (storedSession) {
+      setSession(storedSession);
+      setAppLoadingMessage("Entre com uma conta de adotante para falar com o suporte.");
+    } else {
+      setSession(null);
+    }
+    navigate("login");
+  };
+
   const openPetDetails = async (pet) => {
     setSelectedPet(pet);
     setActivePage("petDetails");
@@ -154,6 +173,7 @@ export default function Home() {
         onMenu={() => setMenuOpen((open) => !open)}
         onNavigate={navigate}
         onMatch={goToMatch}
+        onSupport={goToSupport}
       />
 
       <main>
@@ -170,9 +190,10 @@ export default function Home() {
         {activePage === "login" && <LoginCadastro onNavigate={navigate} onLoginSuccess={handleSession} />}
         {activePage === "match" && <Match session={session} onNavigate={navigate} onSelectPet={openPetDetails} />}
         {activePage === "requests" && <Solicitacoes session={session} onNavigate={navigate} />}
+        {activePage === "support" && <Suporte session={session} onNavigate={navigate} />}
       </main>
 
-      <Footer onNavigate={navigate} />
+      <Footer onNavigate={navigate} onSupport={goToSupport} />
     </div>
   );
 }
@@ -181,7 +202,7 @@ function isApiPet(pet) {
   return pet?.id && String(pet.id).includes("-");
 }
 
-function Header({ activePage, menuOpen, session, onLogout, onMenu, onNavigate, onMatch }) {
+function Header({ activePage, menuOpen, session, onLogout, onMenu, onNavigate, onMatch, onSupport }) {
   return (
     <header className="site-header">
       <div className="header-row">
@@ -203,6 +224,9 @@ function Header({ activePage, menuOpen, session, onLogout, onMenu, onNavigate, o
           </NavButton>
           <NavButton active={activePage === "stories"} onClick={() => onNavigate("stories")}>
             Histórias
+          </NavButton>
+          <NavButton active={activePage === "support"} onClick={onSupport}>
+            Suporte
           </NavButton>
           <Dropdown label="Ajuda" active={activePage === "help"} items={helpOptions} onMain={() => onNavigate("help")} />
         </nav>
@@ -451,7 +475,7 @@ function OrgsBlock({ onNavigate }) {
   );
 }
 
-function Footer({ onNavigate }) {
+function Footer({ onNavigate, onSupport }) {
   return (
     <footer className="site-footer">
       <div className="footer-inner">
@@ -490,7 +514,7 @@ function Footer({ onNavigate }) {
           <button onClick={() => onNavigate("help")}>Central de ajuda</button>
           <button onClick={() => onNavigate("help")}>Dúvidas frequentes</button>
           <button>Regras da comunidade</button>
-          <button>Fale conosco</button>
+          <button onClick={onSupport}>Fale conosco</button>
         </nav>
 
         <form className="footer-newsletter">

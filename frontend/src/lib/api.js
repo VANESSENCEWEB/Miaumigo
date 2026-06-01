@@ -110,6 +110,14 @@ export async function cancelarSolicitacao(id, token) {
 	});
 }
 
+export async function enviarMensagemSuporte(payload, token) {
+	return request("/api/v1/adotantes/me/suporte", {
+		method: "POST",
+		body: payload,
+		token,
+	});
+}
+
 async function request(path, options = {}) {
 	const controller = new AbortController();
 	const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
