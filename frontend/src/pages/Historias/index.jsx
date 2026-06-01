@@ -27,7 +27,7 @@ function HeroHistorias({ onMatch }) {
       </div>
 
       <div className="historias-hero__images">
-        <img className="historias-hero__main-img" src="/pessoa1.png" alt="Pessoa feliz com pet adotado" />
+        <img className="historias-hero__main-img" src="/historias-hero.jpeg" alt="Pessoa feliz com pet adotado" />
       </div>
     </section>
   );

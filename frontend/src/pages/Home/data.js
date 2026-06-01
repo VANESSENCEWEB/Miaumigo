@@ -54,28 +54,28 @@ export const stories = [
 
 export const team = [
   {
-    name: "Maria",
-    role: "Produto e pesquisa",
-    bio: "Ajuda a transformar necessidades de adotantes e protetores em uma experiência simples.",
-    photo: "/pessoa1.png",
+    name: "Maria de Fátima",
+    role: "Idealização e identidade visual",
+    bio: "Apaixonada por pets e inovação, participou da idealização e desenvolvimento do MIAUmigos, contribuindo para a definição da identidade visual e para a criação de uma solução voltada à adoção responsável e ao bem-estar animal.",
+    photo: "/maria.png",
   },
   {
     name: "Mariana",
-    role: "Design e conteúdo",
-    bio: "Cuida da comunicação visual e dos detalhes que deixam a adoção mais acolhedora.",
-    photo: "/pessoa2.png",
+    role: "Design e prototipação",
+    bio: "Dedicada ao design e à prototipação do MIAUmigos, ajudou a desenhar as telas e a experiência visual da plataforma, buscando criar jornadas acolhedoras e intuitivas para tornar a adoção mais simples, segura e agradável.",
+    photo: "/mariana.jpeg",
   },
   {
-    name: "Mateus",
-    role: "Backend e integrações",
-    bio: "Estrutura os fluxos de dados, autenticação e serviços que sustentam a plataforma.",
-    photo: "/pessoa3.png",
+    name: "Mateus Galdino",
+    role: "Backend e recursos da plataforma",
+    bio: "Motivado por desafios e pela busca de soluções eficientes, foi responsável pelo desenvolvimento dos recursos que dão suporte ao MIAUmigos desde sua idealização. Acredita no potencial da tecnologia para conectar pessoas, transformar realidades e promover causas importantes.",
+    photo: "/mateus.jpeg",
   },
   {
-    name: "Vanessa",
-    role: "Frontend e responsividade",
-    bio: "Constrói as telas, interações e ajustes para que o MIAUmigos funcione bem em qualquer tela.",
-    photo: "/pessoa1.png",
+    name: "Vanessa Lima",
+    role: "Experiência do usuário e frontend",
+    bio: "Dedicada à experiência do usuário e ao frontend do MIAUmigos, trabalhou para tornar a plataforma responsiva, acessível e acolhedora em qualquer tela.",
+    photo: "/vanessa.jpeg",
   },
 ];
 
