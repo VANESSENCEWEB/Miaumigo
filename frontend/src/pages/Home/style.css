@@ -5372,28 +5372,6 @@ button {
   mix-blend-mode: screen;
 }
 
-
-/* Hero animated video media. */
-.hero-pets-video {
-  position: relative;
-  z-index: 2;
-  display: block;
-  width: min(96%, 650px);
-  max-height: 540px;
-  object-fit: contain;
-  border-radius: 28px;
-  filter: drop-shadow(0 22px 28px rgba(28, 29, 43, 0.14));
-}
-
-@media (max-width: 760px) {
-  .hero-pets-video {
-    width: min(100%, 360px);
-    max-height: 310px;
-    border-radius: 22px;
-  }
-}
-
-
 /* Fullscreen mobile nav and auth form spacing refinement. */
 @media (max-width: 1180px) {
   .nav-links {
