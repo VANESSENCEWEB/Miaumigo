@@ -47,6 +47,7 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.PATCH, "/api/v1/adotantes/me/perfil").authenticated()
 						.requestMatchers(HttpMethod.GET, "/api/v1/adotantes/me/animais-recomendados").authenticated()
 						.requestMatchers(HttpMethod.GET, "/api/v1/adotantes/me/solicitacoes").authenticated()
+						.requestMatchers(HttpMethod.POST, "/api/v1/adotantes/me/suporte").authenticated()
 						.requestMatchers(HttpMethod.GET, "/api/v1/lares/me/solicitacoes").authenticated()
 						.requestMatchers(HttpMethod.POST, "/api/v1/animais").authenticated()
 						.requestMatchers(HttpMethod.POST, "/api/v1/animais/*/solicitacoes").authenticated()
