@@ -176,7 +176,7 @@ export default function Home() {
         {activePage === "petDetails" && <SobrePets pet={selectedPet} relatedPets={catalogPets.filter(isApiPet)} onBack={() => navigate("pets")} onNavigate={navigate} onAdopt={startAdoption} onMatch={goToMatch} onSelectPet={openPetDetails} />}
         {activePage === "how" && <Como onNavigate={navigate} />}
         {activePage === "orgs" && <Ongs />}
-        {activePage === "stories" && <Historias />}
+        {activePage === "stories" && <Historias onMatch={goToMatch} />}
         {activePage === "help" && <Ajuda onSupport={goToSupport} />}
         {activePage === "adoption" && <Form pet={selectedPet} session={session} onNavigate={navigate} onSubmitted={() => navigate("requests")} />}
         {activePage === "login" && <LoginCadastro onNavigate={navigate} onLoginSuccess={handleSession} />}

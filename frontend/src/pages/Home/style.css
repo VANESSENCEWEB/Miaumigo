@@ -5792,3 +5792,448 @@ button {
     display: grid !important;
   }
 }
+
+
+/* Historias page layout. */
+.historias-page {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: #ffffff;
+}
+
+.historias-page .btn,
+.relatos-section .btn,
+.cta-mudar .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border: 0;
+  border-radius: 999px;
+  font-family: "Poppins", "Inter", system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+}
+
+.historias-page .btn:hover,
+.relatos-section .btn:hover,
+.cta-mudar .btn:hover {
+  opacity: 0.94;
+  transform: translateY(-2px);
+}
+
+.historias-page .btn:active,
+.relatos-section .btn:active,
+.cta-mudar .btn:active {
+  transform: scale(0.98);
+}
+
+.historias-page .btn--primary,
+.cta-mudar .btn--primary {
+  color: var(--ink);
+  background: linear-gradient(135deg, #f7b500 0%, #ffd44d 100%);
+  box-shadow: 0 14px 30px rgba(247, 181, 0, 0.24);
+}
+
+.historias-page .btn--outline-round,
+.relatos-section .btn--outline-round {
+  color: var(--blue-dark);
+  background: transparent;
+  border: 1.5px solid rgba(54, 162, 235, 0.5);
+  padding: 9px 18px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.historias-page .btn--lg,
+.cta-mudar .btn--lg {
+  padding: 16px 32px;
+  font-size: 15px;
+}
+
+.historias-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 0.95fr);
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: center;
+  width: min(1200px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: clamp(3rem, 6vw, 5rem) 0;
+  box-sizing: border-box;
+}
+
+.historias-hero__text {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.historias-hero__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 6px;
+  padding: 7px 14px;
+  color: var(--yellow-dark);
+  background: var(--yellow-soft);
+  border: 1px solid rgba(247, 181, 0, 0.18);
+  border-radius: 999px;
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.historias-hero__title {
+  max-width: 580px;
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(2.4rem, 5vw, 4.35rem);
+  font-weight: 900;
+  line-height: 1.04;
+  letter-spacing: -0.045em;
+}
+
+.historias-hero__title--accent,
+.cta-mudar__title--accent {
+  color: var(--blue);
+}
+
+.historias-hero__desc {
+  max-width: 520px;
+  margin: 0;
+  color: var(--muted);
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.historias-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 0.75rem;
+}
+
+.historias-hero__images {
+  position: relative;
+  min-height: 420px;
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  background: linear-gradient(135deg, rgba(54, 162, 235, 0.12), rgba(247, 181, 0, 0.1));
+  box-shadow: 0 26px 70px rgba(28, 29, 43, 0.1);
+}
+
+.historias-hero__main-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 420px;
+  object-fit: cover;
+}
+
+.quem-section {
+  width: min(1200px, calc(100% - 48px));
+  margin: 0 auto 2.5rem;
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  background: var(--page-bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xl);
+}
+
+.quem-section__header,
+.relatos-section__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+  flex-wrap: wrap;
+}
+
+.quem-section__title,
+.relatos-section__title {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.quem-section__deco {
+  color: var(--blue);
+  font-size: 1.5rem;
+  font-weight: 300;
+  letter-spacing: -2px;
+}
+
+.quem-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 1rem;
+}
+
+.quem-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 16px;
+  text-align: center;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--card-shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.quem-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(54, 162, 235, 0.32);
+  box-shadow: 0 18px 36px rgba(54, 162, 235, 0.12);
+}
+
+.quem-card__avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 10px 24px rgba(28, 29, 43, 0.12);
+}
+
+.quem-card__name {
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.quem-card__role {
+  color: var(--blue-dark);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.quem-card__bio {
+  margin: 0;
+  color: var(--muted);
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.relatos-section {
+  width: min(1200px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 2.5rem 0;
+}
+
+.relatos-section__sub {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 14px;
+}
+
+.historias-page .story-grid-home,
+.relatos-section .story-grid-home {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.historias-page article.story-card-photo,
+.relatos-section article.story-card-photo {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: fit-content;
+  min-height: unset;
+  padding: 0;
+  background: #ffffff;
+  border: 1px solid #e8edf4;
+  border-radius: 18px;
+  box-shadow: 0 4px 20px rgba(9, 27, 52, 0.07);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.historias-page article.story-card-photo:hover,
+.relatos-section article.story-card-photo:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 36px rgba(9, 27, 52, 0.12);
+}
+
+.historias-page article.story-card-photo > img.story-main-photo,
+.relatos-section article.story-card-photo > img.story-main-photo {
+  display: block;
+  width: 100%;
+  height: 240px;
+  min-height: unset;
+  object-fit: cover;
+  border-radius: 0;
+  flex-shrink: 0;
+}
+
+.historias-page article.story-card-photo > .story-card__body,
+.relatos-section article.story-card-photo > .story-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 18px 20px 20px;
+}
+
+.story-card__tag {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  margin-bottom: 12px;
+  padding: 4px 12px;
+  color: #c77c00;
+  background: #fff3cd;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.story-card__title {
+  margin: 0 0 8px;
+  color: #071323;
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.story-card__text {
+  margin: 0 0 14px;
+  color: #5a6478;
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.story-card__author {
+  color: #071323;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.story-dots {
+  display: flex;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 1.25rem;
+}
+
+.story-dot {
+  width: 8px;
+  height: 8px;
+  background: #d5dce8;
+  border-radius: 999px;
+}
+
+.story-dot--active {
+  width: 22px;
+  background: var(--blue);
+}
+
+.cta-mudar {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  width: min(1200px, calc(100% - 48px));
+  margin: 0 auto 3rem;
+  padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1.5rem, 4vw, 3rem);
+  overflow: hidden;
+  background: linear-gradient(135deg, #eef4ff 0%, #fff9e9 100%);
+  border: 1px solid rgba(54, 162, 235, 0.14);
+  border-radius: 24px;
+}
+
+.cta-mudar__pets {
+  width: 220px;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 16px;
+  flex-shrink: 0;
+}
+
+.cta-mudar__title {
+  max-width: 620px;
+  margin: 0 0 0.75rem;
+  color: var(--ink);
+  font-size: clamp(1.6rem, 3vw, 2.25rem);
+  font-weight: 900;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+}
+
+.cta-mudar__desc {
+  max-width: 520px;
+  margin: 0 0 1.25rem;
+  color: var(--muted);
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+@media (max-width: 900px) {
+  .historias-hero {
+    grid-template-columns: 1fr;
+    width: min(100% - 32px, 1200px);
+    padding: 2rem 0;
+  }
+
+  .historias-hero__images {
+    min-height: 300px;
+  }
+
+  .historias-hero__main-img {
+    min-height: 300px;
+  }
+
+  .quem-section,
+  .relatos-section,
+  .cta-mudar {
+    width: min(100% - 32px, 1200px);
+  }
+
+  .historias-page .story-grid-home,
+  .relatos-section .story-grid-home {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cta-mudar {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .cta-mudar__pets {
+    width: 100%;
+    height: 200px;
+  }
+
+  .cta-mudar__content {
+    display: grid;
+    justify-items: center;
+  }
+}
+
+@media (max-width: 560px) {
+  .historias-hero__title {
+    font-size: 2.25rem;
+  }
+
+  .historias-page .story-grid-home,
+  .relatos-section .story-grid-home,
+  .quem-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .quem-section,
+  .relatos-section,
+  .cta-mudar {
+    width: min(100% - 24px, 1200px);
+  }
+}

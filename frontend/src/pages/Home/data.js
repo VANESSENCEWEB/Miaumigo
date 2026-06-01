@@ -52,6 +52,33 @@ export const stories = [
   },
 ];
 
+export const team = [
+  {
+    name: "Maria",
+    role: "Produto e pesquisa",
+    bio: "Ajuda a transformar necessidades de adotantes e protetores em uma experiência simples.",
+    photo: "/pessoa1.png",
+  },
+  {
+    name: "Mariana",
+    role: "Design e conteúdo",
+    bio: "Cuida da comunicação visual e dos detalhes que deixam a adoção mais acolhedora.",
+    photo: "/pessoa2.png",
+  },
+  {
+    name: "Mateus",
+    role: "Backend e integrações",
+    bio: "Estrutura os fluxos de dados, autenticação e serviços que sustentam a plataforma.",
+    photo: "/pessoa3.png",
+  },
+  {
+    name: "Vanessa",
+    role: "Frontend e responsividade",
+    bio: "Constrói as telas, interações e ajustes para que o MIAUmigos funcione bem em qualquer tela.",
+    photo: "/pessoa1.png",
+  },
+];
+
 export const faqs = [
   {
     question: "Como funciona o processo de adoção?",
