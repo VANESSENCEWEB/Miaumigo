@@ -5668,3 +5668,105 @@ button {
     inset: 76px 0 0 0 !important;
   }
 }
+
+
+/* Auth desktop alignment refinement. */
+.auth-page {
+  padding-top: clamp(28px, 4vw, 52px) !important;
+}
+
+.auth-panel {
+  align-items: start !important;
+}
+
+.auth-copy,
+.auth-card {
+  align-self: start !important;
+}
+
+.auth-copy {
+  min-height: auto !important;
+  align-content: start !important;
+  gap: 16px !important;
+  padding: clamp(30px, 4vw, 44px) !important;
+}
+
+.auth-card {
+  padding: clamp(24px, 3vw, 34px) !important;
+}
+
+.auth-copy > span {
+  margin-bottom: 2px !important;
+}
+
+.auth-copy h1 {
+  margin: 0 !important;
+  max-width: 440px !important;
+}
+
+.auth-copy p {
+  max-width: 460px !important;
+}
+
+.auth-benefits {
+  margin-top: 4px !important;
+}
+
+.auth-pet-visual {
+  margin-top: clamp(10px, 2vw, 22px) !important;
+}
+
+.auth-tabs {
+  margin-bottom: 4px !important;
+}
+
+.auth-card > label,
+.auth-preferences {
+  margin-top: 0 !important;
+}
+
+@media (min-width: 981px) {
+  .auth-panel {
+    grid-template-columns: minmax(340px, 0.92fr) minmax(420px, 1.08fr) !important;
+    gap: clamp(28px, 4vw, 56px) !important;
+  }
+
+  .auth-copy {
+    position: sticky;
+    top: 96px;
+  }
+}
+
+@media (max-width: 980px) {
+  .auth-page {
+    padding-top: 28px !important;
+  }
+
+  .auth-panel {
+    gap: 20px !important;
+  }
+
+  .auth-copy,
+  .auth-card {
+    padding: 24px !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .auth-page {
+    padding-top: 20px !important;
+  }
+
+  .auth-copy,
+  .auth-card {
+    padding: 18px !important;
+  }
+
+  .auth-copy {
+    gap: 12px !important;
+  }
+
+  .auth-benefits {
+    margin-top: 0 !important;
+  }
+}
