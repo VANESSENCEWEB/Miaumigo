@@ -11,7 +11,7 @@
   --card-shadow: 0 16px 32px rgba(9, 27, 52, 0.07);
   --radius: 22px;
   min-height: 100vh;
-  overflow-x: hidden;
+  overflow-x: clip;
   background: #fbfdff;
   color: var(--ink);
 }
@@ -1729,6 +1729,7 @@ button {
 .hero-pets-image {
   width: min(112%, 820px);
   max-height: 610px;
+  object-fit: contain;
   object-position: center bottom;
 }
 

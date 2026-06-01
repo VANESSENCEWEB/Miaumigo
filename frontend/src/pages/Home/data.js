@@ -74,7 +74,7 @@ export const team = [
   {
     name: "Vanessa Lima",
     role: "Experiência do usuário e frontend",
-    bio: "Dedicada à experiência do usuário e ao frontend do MIAUmigos, trabalhou para tornar a plataforma responsiva, acessível e acolhedora em qualquer tela.",
+    bio: "Mãe de uma poodle e apaixonada por pets, dedicou-se à experiência do usuário e ao front-end do MiAUmigos, tornando a plataforma responsiva, acessível e acolhedora em qualquer tela — unindo design e tecnologia em prol dos animais.",
     photo: "/vanessa.jpeg",
   },
 ];

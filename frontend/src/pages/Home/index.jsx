@@ -324,30 +324,6 @@ function Hero({ onMatch, onNavigate }) {
               <ChevronRight size={17} />
             </button>
           </div>
-
-          <div className="hero-stats">
-            <span>
-              <strong>{trustBadges.length}</strong>
-              pilares de confiança
-            </span>
-            <span>
-              <strong>100%</strong>
-              gratuito para começar
-            </span>
-            <span>
-              <strong>Match</strong>
-              baseado no perfil
-            </span>
-          </div>
-
-          <div className="trust-row">
-            {trustBadges.map((badge) => (
-              <span key={badge}>
-                <CheckCircle2 size={16} />
-                {badge}
-              </span>
-            ))}
-          </div>
         </div>
 
         <div className="hero-visual" aria-label="Cachorro e gato para adoção">
