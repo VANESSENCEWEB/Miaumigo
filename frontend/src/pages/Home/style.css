@@ -4689,3 +4689,307 @@ button {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* Interaction polish: modern footer, menu and card motion. */
+@keyframes miaumigosShimmer {
+  0% {
+    transform: translateX(-130%) skewX(-18deg);
+  }
+
+  55%,
+  100% {
+    transform: translateX(220%) skewX(-18deg);
+  }
+}
+
+@keyframes miaumigosSoftPulse {
+  0%,
+  100% {
+    box-shadow: 0 12px 28px rgba(247, 181, 0, 0.28);
+  }
+
+  50% {
+    box-shadow: 0 18px 40px rgba(247, 181, 0, 0.42);
+  }
+}
+
+.match-nav-button,
+.primary-action {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.match-nav-button::after,
+.primary-action::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 -45%;
+  z-index: -1;
+  width: 38%;
+  background: linear-gradient(105deg, transparent 10%, rgba(255, 255, 255, 0.58) 50%, transparent 90%);
+  transform: translateX(-130%) skewX(-18deg);
+}
+
+.match-nav-button:hover::after,
+.primary-action:hover::after,
+.match-nav-button:focus-visible::after,
+.primary-action:focus-visible::after {
+  animation: miaumigosShimmer 1.35s ease;
+}
+
+.hero-actions .primary-action,
+.match-nav-button {
+  animation: miaumigosSoftPulse 3.8s ease-in-out infinite;
+}
+
+.secondary-action,
+.link-action,
+.footer-column button,
+.footer-social button,
+.footer-newsletter button,
+.nav-button,
+.dropdown-menu button {
+  transition:
+    color 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.pet-card,
+.find-pet-card,
+.org-card,
+.story-card,
+.step-card,
+.network-card {
+  position: relative;
+  isolation: isolate;
+}
+
+.pet-card::before,
+.find-pet-card::before,
+.org-card::before,
+.story-card::before,
+.step-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 3;
+  height: 3px;
+  background: linear-gradient(90deg, var(--blue), var(--yellow), var(--green));
+  opacity: 0;
+  transform: scaleX(0.55);
+  transform-origin: left;
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+.pet-image-wrap,
+.find-pet-open {
+  overflow: hidden;
+}
+
+.pet-image-wrap img,
+.find-pet-open img,
+.story-card-photo img {
+  transition: transform 0.32s ease, filter 0.32s ease;
+}
+
+@media (hover: hover) {
+  .pet-card:hover::before,
+  .find-pet-card:hover::before,
+  .org-card:hover::before,
+  .story-card:hover::before,
+  .step-card:hover::before {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+
+  .pet-card:hover .pet-image-wrap img,
+  .find-pet-card:hover .find-pet-open img,
+  .story-card:hover .story-card-photo img {
+    transform: scale(1.045);
+    filter: saturate(1.08) contrast(1.03);
+  }
+
+  .nav-links.open .nav-button:hover,
+  .nav-links.open .dropdown-menu button:hover {
+    transform: translateX(4px);
+  }
+}
+
+.nav-links.open {
+  justify-items: stretch;
+  text-align: left;
+}
+
+.nav-links.open .nav-dropdown,
+.nav-links.open .nav-button,
+.nav-links.open .dropdown-menu,
+.nav-links.open .dropdown-menu button {
+  width: 100%;
+}
+
+.nav-links.open .nav-button,
+.nav-links.open .dropdown-menu button {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.nav-links.open .nav-button {
+  min-height: 48px;
+  padding-inline: 16px;
+  border: 1px solid transparent;
+}
+
+.nav-links.open .nav-button:hover,
+.nav-links.open .nav-button:focus-visible,
+.nav-links.open .nav-button.active {
+  border-color: rgba(54, 162, 235, 0.2);
+  box-shadow: 0 12px 24px rgba(54, 162, 235, 0.08);
+}
+
+.nav-links.open .dropdown-menu {
+  padding: 6px 0 0 12px;
+  border: 0;
+  background: transparent;
+}
+
+.nav-links.open .dropdown-menu button {
+  min-height: 40px;
+  padding-inline: 14px;
+}
+
+.site-footer {
+  position: relative;
+  overflow: hidden;
+}
+
+.site-footer::before,
+.site-footer::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+.site-footer::before {
+  top: -120px;
+  right: -120px;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(54, 162, 235, 0.22), transparent 68%);
+}
+
+.site-footer::after {
+  left: -90px;
+  bottom: -110px;
+  width: 260px;
+  height: 260px;
+  background: radial-gradient(circle, rgba(247, 181, 0, 0.16), transparent 66%);
+}
+
+.footer-inner,
+.site-footer > small {
+  position: relative;
+  z-index: 1;
+}
+
+.footer-about,
+.footer-column,
+.footer-newsletter {
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.045);
+  backdrop-filter: blur(10px);
+}
+
+.footer-about {
+  min-height: 100%;
+}
+
+.footer-column button {
+  position: relative;
+  width: 100%;
+  min-height: 32px;
+  padding: 6px 0 6px 14px;
+  border-radius: 10px;
+}
+
+.footer-column button::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  background: var(--blue-light);
+  border-radius: 999px;
+  transform: translateY(-50%) scale(0.8);
+  opacity: 0.68;
+  transition: transform 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+}
+
+.footer-column button:hover,
+.footer-column button:focus-visible {
+  color: #ffffff;
+  background: rgba(54, 162, 235, 0.12);
+  transform: translateX(4px);
+}
+
+.footer-column button:hover::before,
+.footer-column button:focus-visible::before {
+  background: var(--yellow);
+  transform: translateY(-50%) scale(1.2);
+  opacity: 1;
+}
+
+.footer-social button:hover,
+.footer-social button:focus-visible {
+  color: var(--ink);
+  background: var(--yellow);
+  border-color: var(--yellow);
+  box-shadow: 0 12px 26px rgba(247, 181, 0, 0.28);
+  transform: translateY(-3px) rotate(-2deg);
+}
+
+.footer-newsletter div:focus-within {
+  border-color: rgba(126, 200, 245, 0.7);
+  box-shadow: 0 0 0 4px rgba(54, 162, 235, 0.18);
+}
+
+.footer-newsletter button:hover,
+.footer-newsletter button:focus-visible {
+  background: var(--yellow);
+  color: var(--ink);
+}
+
+@media (max-width: 760px) {
+  .nav-links.open .nav-button,
+  .nav-links.open .dropdown-menu button {
+    font-size: 0.95rem;
+  }
+
+  .footer-about,
+  .footer-column,
+  .footer-newsletter {
+    padding: 16px;
+  }
+
+  .footer-column button {
+    min-height: 38px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
