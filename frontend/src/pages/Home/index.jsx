@@ -206,7 +206,13 @@ function Header({ activePage, menuOpen, session, onLogout, onMenu, onNavigate, o
   return (
     <header className="site-header">
       <div className="header-row">
-        <button className="mobile-menu" onClick={onMenu} aria-label="Abrir menu">
+        <button
+          className={menuOpen ? "mobile-menu active" : "mobile-menu"}
+          onClick={onMenu}
+          aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
+          aria-expanded={menuOpen}
+          aria-controls="main-navigation"
+        >
           {menuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
 
@@ -214,7 +220,7 @@ function Header({ activePage, menuOpen, session, onLogout, onMenu, onNavigate, o
           <img src="/logo-miaumigos.svg" alt="MiAUmigos" />
         </button>
 
-        <nav className={menuOpen ? "nav-links open" : "nav-links"} aria-label="Navegação principal">
+        <nav id="main-navigation" className={menuOpen ? "nav-links open" : "nav-links"} aria-label="Navegação principal">
           <Dropdown label="Encontrar Pets" active={activePage === "pets"} items={petCategories} onMain={() => onNavigate("pets")} />
           <NavButton active={activePage === "how"} onClick={() => onNavigate("how")}>
             Como funciona
@@ -248,7 +254,7 @@ function Header({ activePage, menuOpen, session, onLogout, onMenu, onNavigate, o
           )}
           <button className="match-nav-button" onClick={onMatch}>
             <Heart size={16} fill="currentColor" />
-            Fazer Match
+            <span>Fazer Match</span>
           </button>
         </div>
       </div>
@@ -286,7 +292,7 @@ function Dropdown({ label, active, items, onMain }) {
 function HomeLanding({ pets, loading, onNavigate, onMatch, onSelectPet }) {
   return (
     <>
-      <Hero onMatch={onMatch} />
+      <Hero onMatch={onMatch} onNavigate={onNavigate} />
       <PetPreview pets={pets} loading={loading} onNavigate={onNavigate} onSelectPet={onSelectPet} />
       <HowItWorks />
       <StoriesBlock onNavigate={onNavigate} />
@@ -296,21 +302,47 @@ function HomeLanding({ pets, loading, onNavigate, onMatch, onSelectPet }) {
   );
 }
 
-function Hero({ onMatch }) {
+function Hero({ onMatch, onNavigate }) {
   return (
     <section className="hero-section">
       <div className="home-container hero-grid">
         <div className="hero-copy">
+          <span className="hero-trust">
+            <ShieldCheck size={16} />
+            Adoção verificada e acompanhada
+          </span>
           <h1>
-            Encontre seu <strong>novo melhor amigo.</strong>
+            Encontre o seu <strong>melhor amigo.</strong>
           </h1>
-          <p>Descubra pets compatíveis com sua rotina e transforme uma vida.</p>
+          <p>
+            Matching inteligente por estilo de vida, adoção segura e uma jornada mais clara para adotantes,
+            ONGs e protetores.
+          </p>
 
           <div className="hero-actions">
             <button className="primary-action" onClick={onMatch}>
               <Heart size={17} fill="currentColor" />
-              Encontrar meu match
+              Quero adotar
             </button>
+            <button className="secondary-action hero-secondary-action" onClick={() => onNavigate("orgs")}>
+              ONGs & Protetores
+              <ChevronRight size={17} />
+            </button>
+          </div>
+
+          <div className="hero-stats">
+            <span>
+              <strong>{trustBadges.length}</strong>
+              pilares de confiança
+            </span>
+            <span>
+              <strong>100%</strong>
+              gratuito para começar
+            </span>
+            <span>
+              <strong>Match</strong>
+              baseado no perfil
+            </span>
           </div>
 
           <div className="trust-row">
@@ -324,7 +356,17 @@ function Hero({ onMatch }) {
         </div>
 
         <div className="hero-visual" aria-label="Cachorro e gato para adoção">
+          <div className="hero-floating-card hero-floating-card-top">
+            <small>Match MiAUmigos</small>
+            <strong>94% compatível</strong>
+            <span>Rotina e perfil alinhados</span>
+          </div>
           <img className="hero-pets-image" src="/2.svg" alt="Cachorro e gato disponíveis para adoção" />
+          <div className="hero-floating-card hero-floating-card-bottom">
+            <small>Rede de cuidado</small>
+            <strong>ONGs verificadas</strong>
+            <span>Contato seguro para adoção</span>
+          </div>
         </div>
       </div>
     </section>

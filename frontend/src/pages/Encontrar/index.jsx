@@ -6,6 +6,7 @@ import {
   Dog,
   Heart,
   PawPrint,
+  Search,
   SlidersHorizontal,
 } from "lucide-react";
 
@@ -49,6 +50,16 @@ export default function Encontrar({ pets, loading, searchTerm, onSearch, onSelec
           <p>Conheça os pets disponíveis para adoção e transforme uma vida.</p>
         </div>
       </div>
+
+      <label className="find-search-panel">
+        <Search size={18} />
+        <span>Buscar pet</span>
+        <input
+          value={searchTerm}
+          onChange={(event) => onSearch(event.target.value)}
+          placeholder="Nome, espécie, porte ou personalidade"
+        />
+      </label>
 
       <div className="filters-panel">
         <FilterSelect icon={PawPrint} label="Espécie" value={filters.type} onChange={(value) => updateFilter("type", value)} options={["Todos", "Cachorro", "Gato", "Outro"]} />
@@ -105,16 +116,18 @@ function FilterSelect({ icon: Icon, label, value, options, onChange }) {
 }
 
 function FindPetCard({ pet, onSelect }) {
+  const hasScore = pet.score !== null && pet.score !== undefined;
+
   return (
     <article className="find-pet-card">
       <button className="find-pet-open" onClick={onSelect} aria-label={`Ver detalhes de ${pet.name}`}>
-        <span>{pet.badge}</span>
+        <span className={hasScore ? "find-card-badge find-card-badge-match" : "find-card-badge"}>{pet.badge}</span>
         <img src={pet.image} alt={`${pet.name}, ${pet.type} para adoção`} />
         <Heart className="find-favorite" size={17} />
         <div>
           <h3>{pet.name}</h3>
           <p>
-            {pet.age} • {pet.size}
+            {pet.age} • {pet.size} • {pet.sex}
           </p>
           <small>{pet.status}</small>
         </div>
