@@ -361,7 +361,16 @@ function Hero({ onMatch, onNavigate }) {
             <strong>94% compatível</strong>
             <span>Rotina e perfil alinhados</span>
           </div>
-          <img className="hero-pets-image" src="/2.svg" alt="Cachorro e gato disponíveis para adoção" />
+          <video
+            className="hero-pets-video"
+            src="/miau-miau-video.mp4"
+            autoPlay
+            muted
+            loop
+            playsInline
+            poster="/2.svg"
+            aria-label="Cachorro e gato animados para adoção"
+          />
           <div className="hero-floating-card hero-floating-card-bottom">
             <small>Rede de cuidado</small>
             <strong>ONGs verificadas</strong>
