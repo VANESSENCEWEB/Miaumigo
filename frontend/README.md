@@ -15,6 +15,24 @@ npm run dev
 
 Abre em `http://localhost:5173`.
 
+### Imagens dos animais
+
+O frontend prioriza o campo `cloudinary_public_id` retornado pela API para renderizar a imagem de cada animal. Esse campo pode ser:
+
+- uma URL completa, como `https://...`;
+- um caminho público local, como `/gato2.jpeg`;
+- um `public_id` do Cloudinary, como `animais/luna`.
+
+Para usar `public_id` do Cloudinary, configure uma destas variáveis:
+
+```bash
+VITE_CLOUDINARY_CLOUD_NAME=seu_cloud_name
+# ou
+VITE_CLOUDINARY_DELIVERY_BASE_URL=https://res.cloudinary.com/seu_cloud_name/image/upload
+```
+
+Se o animal não tiver imagem cadastrada ou o Cloudinary não estiver configurado, o app usa as imagens locais de fallback.
+
 ---
 
 ## Scripts

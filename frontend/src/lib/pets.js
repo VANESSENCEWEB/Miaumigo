@@ -30,6 +30,9 @@ const fallbackAnimalImages = [
 	"/mock-animais/mock-pet-08.png",
 ];
 
+const cloudinaryCloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+const cloudinaryDeliveryBaseUrl = import.meta.env.VITE_CLOUDINARY_DELIVERY_BASE_URL;
+
 const animalImagesByName = {
 	BOB: "/cachorro1.jpg",
 	LOLA: "/gatomacho1.png",
@@ -82,7 +85,7 @@ const tagLabels = {
 
 export const tagOptions = Object.entries(tagLabels).map(([value, label]) => ({ value, label }));
 
-export function mapAnimal(animal, image = localAnimalImage(animal)) {
+export function mapAnimal(animal, image = animalImage(animal)) {
 	const tags = animal.tags || [];
 	return {
 		...animal,
@@ -140,6 +143,27 @@ function animalKey(animal) {
 	].map((value) => String(value ?? "").trim().toLowerCase()).join("|");
 }
 
+function animalImage(animal) {
+	return databaseAnimalImage(animal) || localAnimalImage(animal);
+}
+
+function databaseAnimalImage(animal) {
+	const imageRef = String(animal.cloudinary_public_id || "").trim();
+	if (!imageRef) {
+		return null;
+	}
+	if (isAbsoluteUrl(imageRef) || imageRef.startsWith("/")) {
+		return imageRef;
+	}
+	if (cloudinaryDeliveryBaseUrl) {
+		return `${cloudinaryDeliveryBaseUrl.replace(/\/$/, "")}/${encodeCloudinaryPublicId(imageRef)}`;
+	}
+	if (cloudinaryCloudName) {
+		return `https://res.cloudinary.com/${cloudinaryCloudName}/image/upload/${encodeCloudinaryPublicId(imageRef)}`;
+	}
+	return null;
+}
+
 function localAnimalImage(animal) {
 	const hardcodedImage = hardcodedAnimalImage(animal);
 	if (hardcodedImage) {
@@ -150,6 +174,11 @@ function localAnimalImage(animal) {
 }
 
 function uniqueAnimalImage(animal, imagensUsadas) {
+	const databaseImage = databaseAnimalImage(animal);
+	if (databaseImage) {
+		imagensUsadas.add(databaseImage);
+		return databaseImage;
+	}
 	const hardcodedImage = hardcodedAnimalImage(animal);
 	if (hardcodedImage && !imagensUsadas.has(hardcodedImage)) {
 		imagensUsadas.add(hardcodedImage);
@@ -204,4 +233,15 @@ function hashAnimal(animal) {
 		hash = (hash * 31 + value.charCodeAt(index)) >>> 0;
 	}
 	return hash;
+}
+
+function isAbsoluteUrl(value) {
+	return /^https?:\/\//i.test(value);
+}
+
+function encodeCloudinaryPublicId(publicId) {
+	return publicId
+		.split("/")
+		.map((segment) => encodeURIComponent(segment))
+		.join("/");
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ArrowRight,
   CheckCircle2,
@@ -68,6 +68,16 @@ export default function Match({ session, onNavigate, onSelectPet }) {
   const [message, setMessage] = useState("");
   const [profile, setProfile] = useState(defaultProfile);
 
+  const loadMatches = useCallback(async () => {
+    if (!session) {
+      onNavigate("login");
+      return;
+    }
+    const recomendacoes = await listarRecomendacoes(session.access_token);
+    setMatches(mapAnimals(recomendacoes));
+    setStage("results");
+  }, [onNavigate, session]);
+
   useEffect(() => {
     if (!session) {
       return;
@@ -101,7 +111,7 @@ export default function Match({ session, onNavigate, onSelectPet }) {
     return () => {
       active = false;
     };
-  }, [session]);
+  }, [loadMatches, session]);
 
   const updateProfile = (name, value) => {
     setProfile((current) => ({ ...current, [name]: value }));
@@ -133,16 +143,6 @@ export default function Match({ session, onNavigate, onSelectPet }) {
     } finally {
       setLoading(false);
     }
-  };
-
-  const loadMatches = async () => {
-    if (!session) {
-      onNavigate("login");
-      return;
-    }
-    const recomendacoes = await listarRecomendacoes(session.access_token);
-    setMatches(mapAnimals(recomendacoes));
-    setStage("results");
   };
 
   if (stage === "results") {
