@@ -5250,3 +5250,97 @@ button {
     border-radius: 14px;
   }
 }
+
+
+/* Mobile drawer navigation replacement. */
+@media (max-width: 1180px) {
+  .nav-links {
+    position: fixed !important;
+    top: 68px !important;
+    left: 0 !important;
+    right: auto !important;
+    bottom: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    justify-items: stretch !important;
+    gap: 8px !important;
+    width: min(84vw, 360px) !important;
+    height: calc(100svh - 68px) !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 18px 14px 24px !important;
+    overflow-y: auto !important;
+    text-align: left !important;
+    background: rgba(255, 255, 255, 0.98) !important;
+    border: 0 !important;
+    border-right: 1px solid var(--line) !important;
+    border-radius: 0 26px 26px 0 !important;
+    box-shadow: 22px 0 48px rgba(28, 29, 43, 0.16) !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: translateX(-105%) !important;
+    transition: transform 0.28s ease, opacity 0.2s ease !important;
+  }
+
+  .nav-links.open {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: translateX(0) !important;
+  }
+
+  .nav-links.open .nav-dropdown,
+  .nav-links.open .dropdown-menu,
+  .nav-links.open .nav-button,
+  .nav-links.open .dropdown-menu button {
+    width: 100% !important;
+    max-width: 100% !important;
+    text-align: left !important;
+  }
+
+  .nav-links.open .nav-button,
+  .nav-links.open .dropdown-menu button {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    min-height: 48px !important;
+    padding: 0 16px !important;
+    border-radius: 14px !important;
+    font-size: 0.96rem !important;
+  }
+
+  .nav-links.open .nav-dropdown > .nav-button {
+    justify-content: space-between !important;
+  }
+
+  .nav-links.open .dropdown-menu {
+    position: static !important;
+    display: none;
+    margin: 4px 0 4px !important;
+    padding: 4px 0 4px 10px !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .nav-links.open .nav-dropdown:hover .dropdown-menu,
+  .nav-links.open .nav-dropdown:focus-within .dropdown-menu {
+    display: grid !important;
+  }
+
+  .nav-links.open .dropdown-menu button {
+    min-height: 40px !important;
+    padding-left: 14px !important;
+    font-size: 0.88rem !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .nav-links {
+    top: 62px !important;
+    width: min(86vw, 340px) !important;
+    height: calc(100svh - 62px) !important;
+    padding-top: 16px !important;
+  }
+}
