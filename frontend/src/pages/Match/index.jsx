@@ -12,6 +12,7 @@ import {
   atualizarPerfilAdotante,
   buscarMeuPerfil,
   COLD_START_MESSAGE,
+  getAdotanteSession,
   isColdStartError,
   listarRecomendacoes,
 } from "../../lib/api";
@@ -67,19 +68,21 @@ export default function Match({ session, onNavigate, onSelectPet }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [profile, setProfile] = useState(defaultProfile);
+  const adotanteSession = getAdotanteSession(session);
 
   const loadMatches = useCallback(async () => {
-    if (!session) {
+    if (!adotanteSession) {
       onNavigate("login");
       return;
     }
-    const recomendacoes = await listarRecomendacoes(session.access_token);
+    const recomendacoes = await listarRecomendacoes(adotanteSession.access_token);
     setMatches(mapAnimals(recomendacoes));
     setStage("results");
-  }, [onNavigate, session]);
+  }, [adotanteSession, onNavigate]);
 
   useEffect(() => {
-    if (!session) {
+    if (!adotanteSession) {
+      onNavigate("login");
       return;
     }
     let active = true;
@@ -88,7 +91,7 @@ export default function Match({ session, onNavigate, onSelectPet }) {
       setLoading(true);
       setMessage("");
       try {
-        const perfil = await buscarMeuPerfil(session.access_token);
+        const perfil = await buscarMeuPerfil(adotanteSession.access_token);
         if (!active) {
           return;
         }
@@ -111,7 +114,7 @@ export default function Match({ session, onNavigate, onSelectPet }) {
     return () => {
       active = false;
     };
-  }, [loadMatches, session]);
+  }, [adotanteSession, loadMatches, onNavigate]);
 
   const updateProfile = (name, value) => {
     setProfile((current) => ({ ...current, [name]: value }));
@@ -128,14 +131,14 @@ export default function Match({ session, onNavigate, onSelectPet }) {
   };
 
   const saveProfileAndLoadMatches = async () => {
-    if (!session) {
+    if (!adotanteSession) {
       onNavigate("login");
       return;
     }
     setLoading(true);
     setMessage("");
     try {
-      const perfil = await atualizarPerfilAdotante(profile, session.access_token);
+      const perfil = await atualizarPerfilAdotante(profile, adotanteSession.access_token);
       setProfile(toFormProfile(perfil));
       await loadMatches();
     } catch (error) {
