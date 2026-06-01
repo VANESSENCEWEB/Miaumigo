@@ -8,6 +8,7 @@ import {
   ChevronRight,
   HandHeart,
   Heart,
+  HelpCircle,
   Home as HomeIcon,
   Menu,
   MessageCircle,
@@ -195,6 +196,7 @@ function isApiPet(pet) {
 
 function Header({ activePage, menuOpen, session, onLogout, onMenu, onNavigate, onMatch, onSupport }) {
   const helpMenuOptions = [
+    { label: "Central de ajuda", icon: HelpCircle, onClick: () => onNavigate("help") },
     ...helpOptions,
     { label: "Fale conosco", icon: MessageCircle, onClick: onSupport },
   ];
@@ -227,7 +229,7 @@ function Header({ activePage, menuOpen, session, onLogout, onMenu, onNavigate, o
           <NavButton active={activePage === "stories"} onClick={() => onNavigate("stories")}>
             Histórias
           </NavButton>
-          <Dropdown label="Ajuda" active={activePage === "help" || activePage === "support"} items={helpMenuOptions} onMain={() => onNavigate("help")} />
+          <Dropdown label="Ajuda" active={activePage === "help" || activePage === "support"} items={helpMenuOptions} />
         </nav>
 
         <div className="header-actions">
@@ -266,7 +268,7 @@ function NavButton({ active, children, onClick }) {
 function Dropdown({ label, active, items, onMain }) {
   return (
     <div className="nav-dropdown">
-      <button className={active ? "nav-button active" : "nav-button"} onClick={onMain}>
+      <button className={active ? "nav-button active" : "nav-button"} type="button" onClick={onMain}>
         {label}
         <ChevronDown size={14} />
       </button>

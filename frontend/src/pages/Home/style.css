@@ -5770,3 +5770,25 @@ button {
     margin-top: 0 !important;
   }
 }
+
+
+/* Stable desktop dropdown hover bridge. */
+@media (min-width: 1181px) {
+  .nav-dropdown::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    height: 10px;
+  }
+
+  .nav-dropdown .dropdown-menu {
+    top: calc(100% + 4px) !important;
+  }
+
+  .nav-dropdown:hover .dropdown-menu,
+  .nav-dropdown:focus-within .dropdown-menu {
+    display: grid !important;
+  }
+}
