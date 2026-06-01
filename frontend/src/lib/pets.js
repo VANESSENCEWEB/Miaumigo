@@ -33,16 +33,6 @@ const fallbackAnimalImages = [
 const cloudinaryCloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
 const cloudinaryDeliveryBaseUrl = import.meta.env.VITE_CLOUDINARY_DELIVERY_BASE_URL;
 
-const animalImagesByName = {
-	BOB: "/cachorro1.jpg",
-	LOLA: "/gatomacho1.png",
-	LUNA: "/gato1.jpg",
-	MEL: "/gato2.jpeg",
-	MILO: "/gatomacho2.png",
-	REX: "/cachorromacho1.png",
-	THOR: "/cachorromacho2.jpg",
-};
-
 const especieLabels = {
 	CACHORRO: "Cachorro",
 	GATO: "Gato",
@@ -165,10 +155,6 @@ function databaseAnimalImage(animal) {
 }
 
 function localAnimalImage(animal) {
-	const hardcodedImage = hardcodedAnimalImage(animal);
-	if (hardcodedImage) {
-		return hardcodedImage;
-	}
 	const images = imagesFor(animal);
 	return images[hashAnimal(animal) % images.length];
 }
@@ -179,14 +165,8 @@ function uniqueAnimalImage(animal, imagensUsadas) {
 		imagensUsadas.add(databaseImage);
 		return databaseImage;
 	}
-	const hardcodedImage = hardcodedAnimalImage(animal);
-	if (hardcodedImage && !imagensUsadas.has(hardcodedImage)) {
-		imagensUsadas.add(hardcodedImage);
-		return hardcodedImage;
-	}
 	const images = imagesFor(animal);
-	const hardcodedIndex = hardcodedImage ? images.indexOf(hardcodedImage) : -1;
-	const startIndex = hardcodedIndex >= 0 ? (hardcodedIndex + 1) % images.length : hashAnimal(animal) % images.length;
+	const startIndex = hashAnimal(animal) % images.length;
 	for (let offset = 0; offset < images.length; offset += 1) {
 		const image = images[(startIndex + offset) % images.length];
 		if (!imagensUsadas.has(image)) {
@@ -194,7 +174,7 @@ function uniqueAnimalImage(animal, imagensUsadas) {
 			return image;
 		}
 	}
-	return hardcodedImage || images[startIndex];
+	return images[startIndex];
 }
 
 function imagesFor(animal) {
@@ -205,18 +185,6 @@ function imagesFor(animal) {
 		return [...catImages, ...fallbackAnimalImages];
 	}
 	return fallbackAnimalImages;
-}
-
-function hardcodedAnimalImage(animal) {
-	return animalImagesByName[normalizarNomeAnimal(animal.nome)] || null;
-}
-
-function normalizarNomeAnimal(nome) {
-	return String(nome || "")
-		.trim()
-		.normalize("NFD")
-		.replace(/[\u0300-\u036f]/g, "")
-		.toUpperCase();
 }
 
 function hashAnimal(animal) {
