@@ -5344,3 +5344,30 @@ button {
     padding-top: 16px !important;
   }
 }
+
+
+/* CTA hover brightness refinement. */
+.match-nav-button,
+.primary-action {
+  background: linear-gradient(135deg, #f7b500 0%, #ffc93d 100%) !important;
+  color: var(--ink) !important;
+  box-shadow: 0 12px 26px rgba(247, 181, 0, 0.24) !important;
+}
+
+.match-nav-button:hover,
+.primary-action:hover,
+.match-nav-button:focus-visible,
+.primary-action:focus-visible {
+  background: linear-gradient(135deg, #ffd44d 0%, #f7b500 62%, #ffe083 100%) !important;
+  color: var(--ink) !important;
+  box-shadow: 0 14px 30px rgba(247, 181, 0, 0.26), 0 0 0 4px rgba(247, 181, 0, 0.14) !important;
+  filter: none !important;
+  transform: translateY(-2px);
+}
+
+.match-nav-button::after,
+.primary-action::after {
+  z-index: 3 !important;
+  background: linear-gradient(105deg, transparent 12%, rgba(255, 255, 255, 0.72) 50%, transparent 88%) !important;
+  mix-blend-mode: screen;
+}
