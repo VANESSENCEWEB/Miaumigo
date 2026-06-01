@@ -134,7 +134,11 @@ function animalKey(animal) {
 }
 
 function animalImage(animal) {
-	return databaseAnimalImage(animal) || localAnimalImage(animal);
+	const databaseImage = databaseAnimalImage(animal);
+	if (databaseImage !== null) {
+		return databaseImage;
+	}
+	return localAnimalImage(animal);
 }
 
 function databaseAnimalImage(animal) {
@@ -151,7 +155,7 @@ function databaseAnimalImage(animal) {
 	if (cloudinaryCloudName) {
 		return `https://res.cloudinary.com/${cloudinaryCloudName}/image/upload/${encodeCloudinaryPublicId(imageRef)}`;
 	}
-	return null;
+	return "";
 }
 
 function localAnimalImage(animal) {
@@ -161,7 +165,7 @@ function localAnimalImage(animal) {
 
 function uniqueAnimalImage(animal, imagensUsadas) {
 	const databaseImage = databaseAnimalImage(animal);
-	if (databaseImage) {
+	if (databaseImage !== null) {
 		imagensUsadas.add(databaseImage);
 		return databaseImage;
 	}
