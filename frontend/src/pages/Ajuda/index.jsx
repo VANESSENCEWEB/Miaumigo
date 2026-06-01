@@ -3,7 +3,7 @@ import { SectionHeading } from "../Home/shared";
 import { faqs } from "../Home/data";
 import { useState } from "react";
 
-export default function Ajuda() {
+export default function Ajuda({ onSupport }) {
   const [openFaq, setOpenFaq] = useState(0);
 
   return (
@@ -41,7 +41,7 @@ export default function Ajuda() {
           <h3>Ainda tem dúvidas?</h3>
           <p>Nossa equipe está pronta para te ajudar.</p>
         </div>
-        <button className="secondary-action">
+        <button className="secondary-action" onClick={onSupport}>
           Fale conosco
           <ChevronRight size={17} />
         </button>

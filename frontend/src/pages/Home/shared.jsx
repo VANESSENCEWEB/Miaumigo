@@ -11,12 +11,14 @@ export function SectionHeading({ eyebrow, title, text }) {
 }
 
 export function PetCard({ pet, onSelect }) {
+  const hasScore = pet.score !== null && pet.score !== undefined;
+
   return (
     <article className="pet-card">
       <button className="pet-card-open" onClick={onSelect} type="button" aria-label={`Ver detalhes de ${pet.name}`}>
         <div className="pet-image-wrap">
           <img src={pet.image} alt={`${pet.name}, ${pet.type} para adoção`} />
-          <small>{pet.badge}</small>
+          <small className={hasScore ? "pet-badge pet-badge-match" : "pet-badge"}>{pet.badge}</small>
           <span className="pet-favorite" aria-label={`Favoritar ${pet.name}`}>
             <Heart size={19} />
           </span>
@@ -26,14 +28,15 @@ export function PetCard({ pet, onSelect }) {
             <h3>{pet.name}</h3>
             <span>{pet.type}</span>
           </div>
-          <p>
-            {pet.age} • {pet.size}
+          <p className="pet-card-meta">
+            {pet.age} • {pet.size} • {pet.sex}
           </p>
           <div className="tags">
             {pet.tags.slice(0, 2).map((tag) => (
               <small key={tag}>{tag}</small>
             ))}
           </div>
+          <span className="pet-card-cta">Ver perfil completo</span>
         </div>
       </button>
     </article>

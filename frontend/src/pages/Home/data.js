@@ -52,6 +52,33 @@ export const stories = [
   },
 ];
 
+export const team = [
+  {
+    name: "Maria de Fátima",
+    role: "Idealização e identidade visual",
+    bio: "Apaixonada por pets e inovação, participou da idealização e desenvolvimento do MIAUmigos, contribuindo para a definição da identidade visual e para a criação de uma solução voltada à adoção responsável e ao bem-estar animal.",
+    photo: "/maria.png",
+  },
+  {
+    name: "Mariana",
+    role: "Design e prototipação",
+    bio: "Dedicada ao design e à prototipação do MIAUmigos, ajudou a desenhar as telas e a experiência visual da plataforma, buscando criar jornadas acolhedoras e intuitivas para tornar a adoção mais simples, segura e agradável.",
+    photo: "/mariana.jpeg",
+  },
+  {
+    name: "Mateus Galdino",
+    role: "Backend e recursos da plataforma",
+    bio: "Motivado por desafios e pela busca de soluções eficientes, foi responsável pelo desenvolvimento dos recursos que dão suporte ao MIAUmigos desde sua idealização. Acredita no potencial da tecnologia para conectar pessoas, transformar realidades e promover causas importantes.",
+    photo: "/mateus.jpeg",
+  },
+  {
+    name: "Vanessa Lima",
+    role: "Experiência do usuário e frontend",
+    bio: "Mãe de uma poodle e apaixonada por pets, dedicou-se à experiência do usuário e ao front-end do MiAUmigos, tornando a plataforma responsiva, acessível e acolhedora em qualquer tela — unindo design e tecnologia em prol dos animais.",
+    photo: "/vanessa.jpeg",
+  },
+];
+
 export const faqs = [
   {
     question: "Como funciona o processo de adoção?",

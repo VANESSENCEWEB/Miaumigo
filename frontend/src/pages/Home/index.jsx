@@ -8,6 +8,7 @@ import {
   ChevronRight,
   HandHeart,
   Heart,
+  HelpCircle,
   Home as HomeIcon,
   Menu,
   MessageCircle,
@@ -123,18 +124,9 @@ export default function Home() {
     const adotanteSession = getAdotanteSession(session);
     if (adotanteSession) {
       setSession(adotanteSession);
-      setAppLoadingMessage("");
-      navigate("support");
-      return;
     }
-    const storedSession = loadSession();
-    if (storedSession) {
-      setSession(storedSession);
-      setAppLoadingMessage("Entre com uma conta de adotante para falar com o suporte.");
-    } else {
-      setSession(null);
-    }
-    navigate("login");
+    setAppLoadingMessage("");
+    navigate("support");
   };
 
   const openPetDetails = async (pet) => {
@@ -184,8 +176,8 @@ export default function Home() {
         {activePage === "petDetails" && <SobrePets pet={selectedPet} relatedPets={catalogPets.filter(isApiPet)} onBack={() => navigate("pets")} onNavigate={navigate} onAdopt={startAdoption} onMatch={goToMatch} onSelectPet={openPetDetails} />}
         {activePage === "how" && <Como onNavigate={navigate} />}
         {activePage === "orgs" && <Ongs />}
-        {activePage === "stories" && <Historias />}
-        {activePage === "help" && <Ajuda />}
+        {activePage === "stories" && <Historias onMatch={goToMatch} />}
+        {activePage === "help" && <Ajuda onSupport={goToSupport} />}
         {activePage === "adoption" && <Form pet={selectedPet} session={session} onNavigate={navigate} onSubmitted={() => navigate("requests")} />}
         {activePage === "login" && <LoginCadastro onNavigate={navigate} onLoginSuccess={handleSession} />}
         {activePage === "match" && <Match session={session} onNavigate={navigate} onSelectPet={openPetDetails} />}
@@ -203,10 +195,22 @@ function isApiPet(pet) {
 }
 
 function Header({ activePage, menuOpen, session, onLogout, onMenu, onNavigate, onMatch, onSupport }) {
+  const helpMenuOptions = [
+    { label: "Central de ajuda", icon: HelpCircle, onClick: () => onNavigate("help") },
+    ...helpOptions,
+    { label: "Fale conosco", icon: MessageCircle, onClick: onSupport },
+  ];
+
   return (
     <header className="site-header">
       <div className="header-row">
-        <button className="mobile-menu" onClick={onMenu} aria-label="Abrir menu">
+        <button
+          className={menuOpen ? "mobile-menu active" : "mobile-menu"}
+          onClick={onMenu}
+          aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
+          aria-expanded={menuOpen}
+          aria-controls="main-navigation"
+        >
           {menuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
 
@@ -214,7 +218,7 @@ function Header({ activePage, menuOpen, session, onLogout, onMenu, onNavigate, o
           <img src="/logo-miaumigos.svg" alt="MiAUmigos" />
         </button>
 
-        <nav className={menuOpen ? "nav-links open" : "nav-links"} aria-label="Navegação principal">
+        <nav id="main-navigation" className={menuOpen ? "nav-links open" : "nav-links"} aria-label="Navegação principal">
           <Dropdown label="Encontrar Pets" active={activePage === "pets"} items={petCategories} onMain={() => onNavigate("pets")} />
           <NavButton active={activePage === "how"} onClick={() => onNavigate("how")}>
             Como funciona
@@ -225,10 +229,7 @@ function Header({ activePage, menuOpen, session, onLogout, onMenu, onNavigate, o
           <NavButton active={activePage === "stories"} onClick={() => onNavigate("stories")}>
             Histórias
           </NavButton>
-          <NavButton active={activePage === "support"} onClick={onSupport}>
-            Suporte
-          </NavButton>
-          <Dropdown label="Ajuda" active={activePage === "help"} items={helpOptions} onMain={() => onNavigate("help")} />
+          <Dropdown label="Ajuda" active={activePage === "help" || activePage === "support"} items={helpMenuOptions} />
         </nav>
 
         <div className="header-actions">
@@ -248,7 +249,7 @@ function Header({ activePage, menuOpen, session, onLogout, onMenu, onNavigate, o
           )}
           <button className="match-nav-button" onClick={onMatch}>
             <Heart size={16} fill="currentColor" />
-            Fazer Match
+            <span>Fazer Match</span>
           </button>
         </div>
       </div>
@@ -267,13 +268,13 @@ function NavButton({ active, children, onClick }) {
 function Dropdown({ label, active, items, onMain }) {
   return (
     <div className="nav-dropdown">
-      <button className={active ? "nav-button active" : "nav-button"} onClick={onMain}>
+      <button className={active ? "nav-button active" : "nav-button"} type="button" onClick={onMain}>
         {label}
         <ChevronDown size={14} />
       </button>
       <div className="dropdown-menu">
-        {items.map(({ label: itemLabel, icon: Icon }) => (
-          <button key={itemLabel} onClick={onMain}>
+        {items.map(({ label: itemLabel, icon: Icon, onClick }) => (
+          <button key={itemLabel} onClick={onClick || onMain}>
             <Icon size={16} />
             {itemLabel}
           </button>
@@ -286,7 +287,7 @@ function Dropdown({ label, active, items, onMain }) {
 function HomeLanding({ pets, loading, onNavigate, onMatch, onSelectPet }) {
   return (
     <>
-      <Hero onMatch={onMatch} />
+      <Hero onMatch={onMatch} onNavigate={onNavigate} />
       <PetPreview pets={pets} loading={loading} onNavigate={onNavigate} onSelectPet={onSelectPet} />
       <HowItWorks />
       <StoriesBlock onNavigate={onNavigate} />
@@ -296,35 +297,47 @@ function HomeLanding({ pets, loading, onNavigate, onMatch, onSelectPet }) {
   );
 }
 
-function Hero({ onMatch }) {
+function Hero({ onMatch, onNavigate }) {
   return (
     <section className="hero-section">
       <div className="home-container hero-grid">
         <div className="hero-copy">
+          <span className="hero-trust">
+            <ShieldCheck size={16} />
+            Adoção verificada e acompanhada
+          </span>
           <h1>
-            Encontre seu <strong>novo melhor amigo.</strong>
+            Encontre o seu <strong>melhor amigo.</strong>
           </h1>
-          <p>Descubra pets compatíveis com sua rotina e transforme uma vida.</p>
+          <p>
+            Matching inteligente por estilo de vida, adoção segura e uma jornada mais clara para adotantes,
+            ONGs e protetores.
+          </p>
 
           <div className="hero-actions">
             <button className="primary-action" onClick={onMatch}>
               <Heart size={17} fill="currentColor" />
-              Encontrar meu match
+              Quero adotar
             </button>
-          </div>
-
-          <div className="trust-row">
-            {trustBadges.map((badge) => (
-              <span key={badge}>
-                <CheckCircle2 size={16} />
-                {badge}
-              </span>
-            ))}
+            <button className="secondary-action hero-secondary-action" onClick={() => onNavigate("orgs")}>
+              ONGs & Protetores
+              <ChevronRight size={17} />
+            </button>
           </div>
         </div>
 
         <div className="hero-visual" aria-label="Cachorro e gato para adoção">
+          <div className="hero-floating-card hero-floating-card-top">
+            <small>Match MiAUmigos</small>
+            <strong>94% compatível</strong>
+            <span>Rotina e perfil alinhados</span>
+          </div>
           <img className="hero-pets-image" src="/2.svg" alt="Cachorro e gato disponíveis para adoção" />
+          <div className="hero-floating-card hero-floating-card-bottom">
+            <small>Rede de cuidado</small>
+            <strong>ONGs verificadas</strong>
+            <span>Contato seguro para adoção</span>
+          </div>
         </div>
       </div>
     </section>
@@ -358,10 +371,10 @@ function PetPreview({ pets, loading, onNavigate, onSelectPet }) {
 
 function HowItWorks() {
   const steps = [
-    { title: "Cadastre-se", text: "Conte sobre você e o tipo de pet ideal.", icon: CalendarCheck },
-    { title: "Receba matches", text: "Nosso algoritmo encontra pets compatíveis.", icon: PawPrint },
-    { title: "Converse", text: "Fale com a ONG ou protetor responsável.", icon: MessageCircle },
-    { title: "Adoção com amor", text: "Finalize a adoção e realize um novo melhor amigo.", icon: HomeIcon },
+    { title: "Cadastre-se", text: "Conte sobre você e o tipo de pet ideal.", icon: CalendarCheck, tone: "blue" },
+    { title: "Receba matches", text: "Nosso algoritmo encontra pets compatíveis.", icon: PawPrint, tone: "yellow" },
+    { title: "Converse", text: "Fale com a ONG ou protetor responsável.", icon: MessageCircle, tone: "green" },
+    { title: "Adoção com amor", text: "Finalize a adoção e realize um novo melhor amigo.", icon: HomeIcon, tone: "pink" },
   ];
 
   return (
@@ -372,9 +385,9 @@ function HowItWorks() {
           <h2>Um processo simples, seguro e cheio de amor.</h2>
         </div>
         <div className="timeline">
-          {steps.map(({ title, text, icon: Icon }, index) => (
+          {steps.map(({ title, text, icon: Icon, tone }, index) => (
             <article className="timeline-step" key={title}>
-              <div className="timeline-icon">
+              <div className={`timeline-icon timeline-icon-${tone}`}>
                 <Icon size={28} />
               </div>
               <span>{index + 1}</span>
@@ -485,9 +498,30 @@ function Footer({ onNavigate, onSupport }) {
           </button>
           <p>Conectando pets a lares cheios de amor em Pernambuco.</p>
           <div className="footer-social">
-            <button aria-label="Instagram">ig</button>
-            <button aria-label="Facebook">f</button>
-            <button aria-label="Comunidade">◎</button>
+            <button aria-label="Instagram">
+              <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18">
+                <path
+                  d="M7.6 2.75h8.8A4.86 4.86 0 0 1 21.25 7.6v8.8a4.86 4.86 0 0 1-4.85 4.85H7.6a4.86 4.86 0 0 1-4.85-4.85V7.6A4.86 4.86 0 0 1 7.6 2.75Zm0 1.7A3.15 3.15 0 0 0 4.45 7.6v8.8a3.15 3.15 0 0 0 3.15 3.15h8.8a3.15 3.15 0 0 0 3.15-3.15V7.6a3.15 3.15 0 0 0-3.15-3.15H7.6Zm4.4 3.18a4.37 4.37 0 1 1 0 8.74 4.37 4.37 0 0 1 0-8.74Zm0 1.7a2.67 2.67 0 1 0 0 5.34 2.67 2.67 0 0 0 0-5.34Zm4.58-2.36a1.02 1.02 0 1 1 0 2.04 1.02 1.02 0 0 1 0-2.04Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </button>
+            <button aria-label="Facebook">
+              <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18">
+                <path
+                  d="M13.45 21.5v-8.3h2.8l.42-3.23h-3.22V7.91c0-.94.26-1.58 1.61-1.58h1.72V3.44a22.7 22.7 0 0 0-2.5-.13c-2.48 0-4.18 1.51-4.18 4.29v2.37H7.3v3.23h2.8v8.3h3.35Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </button>
+            <button aria-label="LinkedIn">
+              <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18">
+                <path
+                  d="M6.94 8.98H3.7v10.6h3.24V8.98ZM5.32 4.2c-1.04 0-1.72.69-1.72 1.6 0 .89.66 1.59 1.68 1.59h.02c1.07 0 1.73-.7 1.73-1.59-.02-.91-.66-1.6-1.71-1.6Zm14.98 9.3c0-3.25-1.73-4.76-4.04-4.76-1.86 0-2.69 1.02-3.15 1.74v-1.5H9.87c.04.99 0 10.6 0 10.6h3.24v-5.92c0-.32.02-.63.12-.86.26-.63.84-1.29 1.82-1.29 1.29 0 1.8.98 1.8 2.41v5.66h3.24l.01-6.08Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </button>
           </div>
         </div>
 
