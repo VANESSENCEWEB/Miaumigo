@@ -5662,3 +5662,31 @@ button {
     column-gap: 8px !important;
   }
 }
+
+
+/* Mobile menu vertical breathing room. */
+@media (max-width: 1180px) {
+  .nav-links {
+    inset: 82px 0 0 0 !important;
+    height: calc(100dvh - 82px) !important;
+    min-height: calc(100dvh - 82px) !important;
+    padding-top: 24px !important;
+  }
+
+  .nav-links::before {
+    inset: 82px 0 0 0 !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .nav-links {
+    inset: 76px 0 0 0 !important;
+    height: calc(100dvh - 76px) !important;
+    min-height: calc(100dvh - 76px) !important;
+    padding-top: 22px !important;
+  }
+
+  .nav-links::before {
+    inset: 76px 0 0 0 !important;
+  }
+}
